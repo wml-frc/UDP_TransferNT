@@ -1,23 +1,6 @@
-#include <iostream>
+#include "Server.h"
 
-// Server headers
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
-#include <unistd.h>
-
-#define BUFFLEN 512 // Max length of buffer
-#define PORT 8080
-
-template<typename T>
-void kill(T s) {
-	perror(s);
-	exit(1);
-}
-
-int main() {
+int Server::server_test() {
 	struct sockaddr_in si_me, si_other;
 
 	int s, i, recv_len;
@@ -25,9 +8,11 @@ int main() {
 
 	char buffer[BUFFLEN];
 
+
 	// create UDP socket
 	if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
-		kill("socket");
+		// kill("socket");
+		KILL("SOCKET");
 	}
 
 	// zero out the structure
@@ -39,7 +24,8 @@ int main() {
 
 	// bind socket to port
 	if (bind(s, (struct sockaddr *)&si_me, sizeof(si_me)) == -1) {
-		kill("bind");
+		// kill("bind");
+		KILL("SOCKET");
 	}
 
 	// keep listening for data
@@ -49,7 +35,8 @@ int main() {
 
 		// try to receive some data, this is a blocking call
 		if ((recv_len = recvfrom(s, buffer, BUFFLEN, 0, (struct sockaddr *)&si_other, &slen)) == -1) {
-			kill("recvfrom()");
+			// kill("recvfrom()");
+			KILL("SOCKET");
 		}
 
 		// Print details of the client/peer and the data received
@@ -58,7 +45,8 @@ int main() {
 
 		// now reply the client with same data
 		if (sendto(s, buffer, recv_len, 0, (struct sockaddr *)&si_other, slen) == -1) {
-			kill("sendto()");
+			// kill("sendto()");
+			KILL("SOCKET");
 		}
 
 		memset(buffer, 0, sizeof(buffer));

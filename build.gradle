@@ -12,6 +12,8 @@ model {
 	components {
 		main(NativeExecutableSpec) {
 			
+
+			// Sources
 			sources.cpp {   
 				source {
 					srcDirs = ['src/main/cpp']
@@ -22,6 +24,11 @@ model {
 					srcDirs = ['src/main/include']
 				}
 				
+			}
+
+			// Binaries
+			binaries.all {
+				linker.args << '-pthread'
 			}
 		}
 	}

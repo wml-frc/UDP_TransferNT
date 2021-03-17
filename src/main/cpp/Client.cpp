@@ -4,8 +4,8 @@ int Client::client_test() {
 	struct sockaddr_in si_other;
 	int s, i;
 	socklen_t slen = sizeof(si_other);
-	char buffer[BUFFLEN];
-	char message[BUFFLEN];
+	char buffer[BUFFSIZE];
+	char message[BUFFSIZE];
 
 	if ((s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
 		KILL("socket");
@@ -15,7 +15,7 @@ int Client::client_test() {
 	si_other.sin_family = AF_INET;
 	si_other.sin_port = htons(PORT);
 
-	if (inet_aton(SERVER, &si_other.sin_addr) == 0) {
+	if (inet_aton(SERVER_IP, &si_other.sin_addr) == 0) {
 		ERROR("inet_aton() failed\n");
 	}
 
@@ -30,8 +30,8 @@ int Client::client_test() {
 
 		// receive a reply and print it
 		// clear the buffer by filling null
-		memset(buffer, '\0', BUFFLEN);
-		if (recvfrom(s, buffer, BUFFLEN, 0, (struct sockaddr *)&si_other, &slen) == -1) {
+		memset(buffer, '\0', BUFFSIZE);
+		if (recvfrom(s, buffer, BUFFSIZE, 0, (struct sockaddr *)&si_other, &slen) == -1) {
 			KILL("recvfrom()");
 		}
 

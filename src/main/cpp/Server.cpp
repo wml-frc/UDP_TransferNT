@@ -1,12 +1,69 @@
 #include "Server.h"
 
+/**
+ * Readdress the values
+ */
+Server::Server() {
+	_socketValues = new Socket();
+	_state = new ServerState(ServerState::IDLE);
+}
+
+int Server::init(bool initHandshake) {
+	/**
+	 * Create UDP socket
+	 */
+	if ((*_socketValues->getSocket() = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
+		KILL("SOCKET ERROR");
+	}
+
+	/**
+	 * Zero out structure
+	 */
+	memset((char *)_socketValues->getLocalAddress(), 0, sizeof(*_socketValues->getLocalAddress()));
+
+	/**
+	 * Address set
+	 */
+	_socketValues->getLocalAddress()->sin_family = AF_INET;
+	_socketValues->getLocalAddress()->sin_port = htons(*_socketValues->getPort());
+	_socketValues->getLocalAddress()->sin_addr.s_addr = htonl(INADDR_ANY); // Allow any connecting addresses
+
+	/**
+	 * Bind the socket
+	 */
+	if (bind(*_socketValues->getSocket(), (struct sockaddr *)_socketValues->getLocalAddress(), sizeof(*_socketValues->getLocalAddress())) == -1) {
+		KILL("BIND ERROR");
+	}
+
+	/**
+	 * Handshake with client (Gets buffersize to send and recieve data)
+	 */
+	
+}
+
+void Server::update() {
+	switch (*_state) {
+		case ServerState::IDLE:
+			break;
+		
+		case ServerState::CONNECTING:
+			break;
+		
+		case ServerState::CONNECTED:
+			break;
+
+		default:
+			break;
+	}
+}
+
 int Server::server_test() {
 	struct sockaddr_in si_me, si_other;
 
 	int s, i, recv_len;
 	socklen_t slen = sizeof(si_other);
 
-	char buffer[BUFFLEN];
+	char buffer[BUFFSIZE];
 
 
 	// create UDP socket
@@ -34,7 +91,7 @@ int Server::server_test() {
 		fflush(stdout);
 
 		// try to receive some data, this is a blocking call
-		if ((recv_len = recvfrom(s, buffer, BUFFLEN, 0, (struct sockaddr *)&si_other, &slen)) == -1) {
+		if ((recv_len = recvfrom(s, buffer, BUFFSIZE, 0, (struct sockaddr *)&si_other, &slen)) == -1) {
 			// kill("recvfrom()");
 			KILL("SOCKET");
 		}

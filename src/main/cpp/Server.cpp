@@ -63,7 +63,7 @@ int Server::server_test() {
 	int s, i, recv_len;
 	socklen_t slen = sizeof(si_other);
 
-	char buffer[BUFFSIZE];
+	char buffer[DEFAULT_BUFFSIZE];
 
 
 	// create UDP socket
@@ -91,7 +91,7 @@ int Server::server_test() {
 		fflush(stdout);
 
 		// try to receive some data, this is a blocking call
-		if ((recv_len = recvfrom(s, buffer, BUFFSIZE, 0, (struct sockaddr *)&si_other, &slen)) == -1) {
+		if ((recv_len = recvfrom(s, buffer, DEFAULT_BUFFSIZE, 0, (struct sockaddr *)&si_other, &slen)) == -1) {
 			// kill("recvfrom()");
 			KILL("SOCKET");
 		}

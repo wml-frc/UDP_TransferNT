@@ -4,8 +4,8 @@ int Client::client_test() {
 	struct sockaddr_in si_other;
 	int s, i;
 	socklen_t slen = sizeof(si_other);
-	char buffer[BUFFSIZE];
-	char message[BUFFSIZE];
+	char buffer[DEFAULT_BUFFSIZE];
+	char message[DEFAULT_BUFFSIZE];
 
 	if ((s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
 		KILL("socket");
@@ -30,8 +30,8 @@ int Client::client_test() {
 
 		// receive a reply and print it
 		// clear the buffer by filling null
-		memset(buffer, '\0', BUFFSIZE);
-		if (recvfrom(s, buffer, BUFFSIZE, 0, (struct sockaddr *)&si_other, &slen) == -1) {
+		memset(buffer, '\0', DEFAULT_BUFFSIZE);
+		if (recvfrom(s, buffer, DEFAULT_BUFFSIZE, 0, (struct sockaddr *)&si_other, &slen) == -1) {
 			KILL("recvfrom()");
 		}
 

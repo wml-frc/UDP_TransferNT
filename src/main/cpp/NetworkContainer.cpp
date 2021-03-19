@@ -33,6 +33,28 @@ int Network::init() {
 	// handShake();
 }
 
+void Network::send(DataPacket *dp) {
+	char buffer[DEFAULT_BUFFSIZE];
+
+	serialize(dp, buffer);
+
+	if (sendto(*_socketValues->getSocket(), buffer, *_socketValues->getRecvLen(), 0, (struct sockaddr *)_socketValues->getExternalAddress(), *_socketValues->getExternalAddressLen()) == -1) {
+		KILL("SEND");
+	}
+
+	memset(buffer, 0, sizeof(buffer));
+}
+
+void Network::recv(DataPacket *dp) {
+	char buffer[DEFAULT_BUFFSIZE];
+
+	if ((*_socketValues->getRecvLen() = recvfrom(*_socketValues->getSocket(), buffer, DEFAULT_BUFFSIZE, 0, (struct sockaddr *)_socketValues->getExternalAddress(), _socketValues->getExternalAddressLen())) == -1) {
+		KILL("RECEIVE");
+	}
+
+	deserialize(dp, buffer);
+} 
+
 void Network::update() {
 	switch(*_state) {
 		case State::IDLE:

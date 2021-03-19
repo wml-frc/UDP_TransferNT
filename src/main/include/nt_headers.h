@@ -36,8 +36,8 @@
 /**
  * Buffer size for data transfer
  */
-#ifndef BUFFSIZE
-#define BUFFSIZE 512 // Max length of buffer
+#ifndef DEFAULT_BUFFSIZE
+#define DEFAULT_BUFFSIZE 512 // Max length of buffer
 #endif
 
 /**

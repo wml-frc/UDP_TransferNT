@@ -20,6 +20,10 @@ int main() {
 	// server.server_test();
 	// client.client_test();
 
+	// int16_t value = 5;
+	// char16_t character = 'h';
+	// _Float32 doubleVal = 0.001;
+
 	// server_t.join();
 	// client_t.join();
 	std::cout << "Test" << std::endl;

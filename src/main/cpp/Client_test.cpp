@@ -1,6 +1,6 @@
-#include "Client.h"
+#include "Client_test.h"
 
-int Client::client_test() {
+int Client_test::client_test() {
 	struct sockaddr_in si_other;
 	int s, i;
 	socklen_t slen = sizeof(si_other);

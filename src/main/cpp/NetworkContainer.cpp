@@ -3,6 +3,11 @@
 int Network::init() {
 
 	/**
+	 * Set state: Connecting
+	 */
+	setState(State::CONNECTING);
+
+	/**
 	 * Clear addresses
 	 */
 	bzero(_socketValues->getLocalAddress(), sizeof(*_socketValues->getLocalAddress()));
@@ -11,6 +16,7 @@ int Network::init() {
 	 * Create UDP socket
 	 */
 	if ((*_socketValues->getSocket() = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
+		setState(State::DEAD);
 		KILL("SOCKET ERROR");
 	}
 
@@ -36,11 +42,13 @@ int Network::init() {
 	switch (*this->_type) {
 		case Type::SERVER:
 			if (bind(*_socketValues->getSocket(), (struct sockaddr *)_socketValues->getLocalAddress(), sizeof(*_socketValues->getLocalAddress())) == -1) {
+				setState(State::DEAD);
 				KILL("BIND ERROR");
 			}
 			break;
 		case Type::CLIENT:
 			if (connect(*_socketValues->getSocket(), (struct sockaddr *)_socketValues->getExternalAddress(), *_socketValues->getExternalAddressLen()) == -1) {
+				setState(State::DEAD);
 				KILL("CONNECT FAIL");
 			}
 			break;
@@ -56,18 +64,20 @@ int Network::init() {
  * Send data to ip and port
  */
 void Network::send(DataPacket *dp) {
-	char buffer[DEFAULT_BUFFSIZE];
+	char buffer[PACKETSIZE];
 
 	serialize(dp, buffer);
 
 	switch (*this->_type) {
 		case Type::SERVER:
-			if (sendto(*_socketValues->getSocket(), buffer, DEFAULT_BUFFSIZE, 0, (struct sockaddr *)_socketValues->getExternalAddress(), *_socketValues->getExternalAddressLen()) == -1) {
+			if (sendto(*_socketValues->getSocket(), buffer, sizeof(buffer), 0, (struct sockaddr *)_socketValues->getExternalAddress(), *_socketValues->getExternalAddressLen()) == -1) {
+				setState(State::DEAD);
 				KILL("SEND");
 			}
 			break;
 		case Type::CLIENT:
-			if (sendto(*_socketValues->getSocket(), buffer, DEFAULT_BUFFSIZE, 0, (struct sockaddr *)NULL, *_socketValues->getExternalAddressLen()) == -1) {
+			if (sendto(*_socketValues->getSocket(), buffer, sizeof(buffer), 0, (struct sockaddr *)NULL, *_socketValues->getExternalAddressLen()) == -1) {
+				setState(State::DEAD);
 				KILL("SEND");
 			}
 			break;
@@ -80,19 +90,22 @@ void Network::send(DataPacket *dp) {
  * Receive data from ip and port
  */
 void Network::recv(DataPacket *dp) {
-	char buffer[DEFAULT_BUFFSIZE];
-
-	if ((*_socketValues->getRecvLen() = recvfrom(*_socketValues->getSocket(), buffer, DEFAULT_BUFFSIZE, 0, (struct sockaddr *)_socketValues->getExternalAddress(), _socketValues->getExternalAddressLen())) == -1) {
-		KILL("RECEIVE");
-	}
+	char buffer[PACKETSIZE];
 
 	switch (*this->_type) {
 		case Type::SERVER:
 			*_socketValues->getValread() = recvfrom(*_socketValues->getSocket(), buffer, sizeof(buffer), 0, (struct sockaddr *)_socketValues->getExternalAddress(), _socketValues->getExternalAddressLen());
-			if (*_socketValues->getValread() == -1) { KILL("RECV"); }
+			if (*_socketValues->getValread() == -1) { 
+				setState(State::DEAD);
+				KILL("RECV"); 
+			}
 			break;
 		case Type::CLIENT:
 			*_socketValues->getValread() = recvfrom(*_socketValues->getSocket(), buffer, sizeof(buffer), 0, (struct sockaddr *)NULL, NULL);
+			if (*_socketValues->getValread() == -1) { 
+				setState(State::DEAD);
+				KILL("RECV"); 
+			}
 			break;
 	}
 

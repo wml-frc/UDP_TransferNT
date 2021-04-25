@@ -1,7 +1,6 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include "nt_headers.h"
 #include "NetworkContainer.h"
 
 class Server : public Network {
@@ -9,9 +8,8 @@ class Server : public Network {
 	Server() : Network(Type::SERVER, false) {
 		std::cout << "UDP Server Created" << std::endl;
 	}
- 
- private:
-	Type type;
+
+	Type getType() { return Network::getType(); }
 };
 
 #endif

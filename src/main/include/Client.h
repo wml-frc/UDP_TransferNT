@@ -1,11 +1,15 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#include "nt_headers.h"
+#include "NetworkContainer.h"
 
-class Client {
+class Client : public Network {
  public:
-	int client_test();
+	Client() : Network(Type::CLIENT, false) {
+		std::cout << "UDP Client Created" << std::endl;
+	}
+
+	Type getType() { return Network::getType(); }
 };
 
 #endif

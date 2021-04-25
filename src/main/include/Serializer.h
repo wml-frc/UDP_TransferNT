@@ -24,8 +24,8 @@ class Serializer {
 	/**
 	 * Templated cycler
 	 */
-	template<typename t>
-	static void serialCycler(t *singleDt, char *data, bool reverse = false);
+	template<typename t, typename v>
+	static t *serialCycler(t *singleDt, v *data, bool reverse = false);
 };
 
 #endif

@@ -1,13 +1,13 @@
 #include "main.h"
 
 int server() {
-	Server server;
-	server.server_test();
+	// Server server;
+	// server.server_test();
 }
 
 int client() {
-	Client client;
-	client.client_test();
+	// Client client;
+	// client.client_test();
 }
 
 int main() {

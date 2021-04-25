@@ -18,7 +18,7 @@ class Socket {
 	int *getRecvLen() { return &recvlen; }
 	struct sockaddr_in *getLocalAddress() { return &address_local; }
 	struct sockaddr_in *getExternalAddress() { return &address_local; }
-	socklen_t *getExternalAddressLen() { return &addressExt_len; }
+	socklen_t *getExternalAddressLen() { return &(addressExt_len = sizeof(address_external)); }
 
  private:
 	uint16_t h_port = HANDSHAKE_PORT;

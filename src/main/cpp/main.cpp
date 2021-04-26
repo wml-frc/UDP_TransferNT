@@ -106,30 +106,30 @@ int main() {
 
 	std::cout << "Test" << std::endl;
 
-	// #ifdef CLIENT_RUN
+	#ifdef CLIENT_RUN
 	std::cout << "Client type: " << (int)client.getType() << std::endl;
-	// #endif
+	#endif
 
-	// #ifdef SERVER_RUN
+	#ifdef SERVER_RUN
 		std::cout << "Server type: " << (int)server.getType() << std::endl;
-	// #endif
+	#endif
 	
-	// #ifdef CLIENT_RUN
+	#ifdef CLIENT_RUN
 	std::thread client_t(client_func, true);
-	// #endif
+	#endif
 
-	// #ifdef SERVER_RUN
+	#ifdef SERVER_RUN
 	std::thread server_t(server_func, false);
-	// #endif
+	#endif
 
 
-	// #ifdef CLIENT_RUN
+	#ifdef CLIENT_RUN
 	client_t.join();
-	// #endif
+	#endif
 
-	// #ifdef SERVER_RUN
+	#ifdef SERVER_RUN
 	server_t.join();
-	// #endif
+	#endif
 
 
 

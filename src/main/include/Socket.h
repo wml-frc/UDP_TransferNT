@@ -11,6 +11,10 @@ class Socket {
 	 * Getters (Pointer functions can be used to set values)
 	 */
 	uint16_t *getHandshakePort() { return &h_port; }
+
+	void setPort(uint16_t port) { this->port = port; }
+	void setIP(char ip[IP_LEN]) { strcpy(ip, this->ipaddress); }
+
 	uint16_t *getPort() { return &port; }
 	char *getIP() { return ipaddress; }
 	int *getSocket() { return &sock; }
@@ -23,7 +27,7 @@ class Socket {
  private:
 	uint16_t h_port = HANDSHAKE_PORT;
 	uint16_t port = PORT;
-	char ipaddress[20] = SERVER_IP;
+	char ipaddress[IP_LEN] = SERVER_IP;
 	int sock = 0;
 	int valread;
 	int recvlen;

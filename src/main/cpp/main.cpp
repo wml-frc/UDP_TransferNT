@@ -24,11 +24,16 @@ void server_func() {
 		currTime = std::chrono::system_clock::now();
 		dt = currTime-lastTime;
 
-		server.recv(&dp);
-		std::cout << "Server recv char: " << dp.getCharacters(0) << std::endl;
-		std::cout << "Server recv int: " << dp.getIntegers(0) << std::endl;
-		std::cout << "Server recv bool: " << dp.getBooleans(0) << std::endl;
-		std::cout << "Server recv decimal: " << dp.getDecimals(0) << std::endl;
+		dp.setCharacters(0, 't');
+		dp.setIntegers(0, 3);
+		dp.setBooleans(0, true);
+		dp.setDecimals(0, 1.004);
+		server.send(&dp);
+
+		std::cout << "Server send char: " << dp.getCharacters(0) << std::endl;
+		std::cout << "Server send int: " << dp.getIntegers(0) << std::endl;
+		std::cout << "Server send bool: " << dp.getBooleans(0) << std::endl;
+		std::cout << "Server send decimal: " << dp.getDecimals(0) << std::endl;
 
 		std::cout << "dt: " << dt.count() << std::endl;
 		system("clear");
@@ -40,6 +45,10 @@ void client_func() {
 	// Client client;
 	// client.client_test();
 
+	auto currTime = std::chrono::system_clock::now();
+	std::chrono::duration<double> dt;
+	auto lastTime = std::chrono::system_clock::now();
+
 	client.init();
 	std::cout << "Connected Client" << std::endl;
 
@@ -48,11 +57,19 @@ void client_func() {
 	DataPacket dp;
 
 	while (true) {
-		dp.setCharacters(0, 't');
-		dp.setIntegers(0, 3);
-		dp.setBooleans(0, true);
-		dp.setDecimals(0, 1.004);
-		client.send(&dp);
+		currTime = std::chrono::system_clock::now();
+		dt = currTime-lastTime;
+
+		server.recv(&dp);
+		
+		std::cout << "Client recv char: " << dp.getCharacters(0) << std::endl;
+		std::cout << "Client recv int: " << dp.getIntegers(0) << std::endl;
+		std::cout << "Client recv bool: " << dp.getBooleans(0) << std::endl;
+		std::cout << "Client recv decimal: " << dp.getDecimals(0) << std::endl;
+
+		std::cout << "dt: " << dt.count() << std::endl;
+		system("clear");
+		lastTime = currTime;
 	}
 }
 

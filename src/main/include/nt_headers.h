@@ -32,6 +32,14 @@
 	#endif
 #endif
 
+
+/**
+ * IP Length
+ */
+#ifndef IP_LEN
+#define IP_LEN 20
+#endif
+
 #define NETWORK_VERSION "1.4"
 
 /**

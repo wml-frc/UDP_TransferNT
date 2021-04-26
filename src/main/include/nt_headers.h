@@ -28,7 +28,7 @@
 	 * Use direct connect to ip
 	 */
 	#ifndef SERVER_IP
-	#define SERVER_IP "127.0.0.1"
+	#define SERVER_IP "191.168.178.21"
 	#endif
 #endif
 

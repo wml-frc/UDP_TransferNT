@@ -20,6 +20,8 @@ void server_func(bool sender = false) {
 
 	DataPacket dp;
 
+	float val = 1;
+
 	while (true) {
 		currTime = std::chrono::system_clock::now();
 		dt = currTime-lastTime;
@@ -28,7 +30,7 @@ void server_func(bool sender = false) {
 			dp.setCharacters(0, 't');
 			dp.setIntegers(0, 3);
 			dp.setBooleans(0, true);
-			dp.setDecimals(0, 1.004);
+			dp.setDecimals(0, val);
 			server.send(&dp);
 		} else {
 			server.recv(&dp);
@@ -37,9 +39,10 @@ void server_func(bool sender = false) {
 			std::cout << "Server recv int: " << dp.getIntegers(0) << std::endl;
 			std::cout << "Server recv bool: " << dp.getBooleans(0) << std::endl;
 			std::cout << "Server recv decimal: " << dp.getDecimals(0) << std::endl;
+			std::cout << "dt: " << dt.count() << std::endl;
 			system("clear");
 		}
-		// std::cout << "dt: " << dt.count() << std::endl;
+		val += 0.001;
 		lastTime = currTime;
 	}
 }

@@ -57,8 +57,6 @@ void client_func(bool sender = false) {
 	client.init();
 	std::cout << "Connected Client" << std::endl;
 
-	sleep(5);
-
 	DataPacket dp;
 
 	while (true) {

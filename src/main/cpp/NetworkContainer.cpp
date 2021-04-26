@@ -7,11 +7,8 @@ int Network::init() {
 	 */
 	setState(State::CONNECTING);
 
-	/**
-	 * Clear addresses
-	 */
-	memset(_socketValues->getLocalAddress(), 0, *_socketValues->getLocalAddressLen());
-	memset(_socketValues->getExternalAddress(), 0, *_socketValues->getExternalAddressLen());
+	struct hostent *host;
+	host = (struct hostent *)gethostbyname((char *)_socketValues->getIP());
 
 	/**
 	 * Create UDP socket
@@ -38,11 +35,19 @@ int Network::init() {
 					_socketValues->getExternalAddress()->sin_addr.s_addr = INADDR_ANY;
 					break;
 				case ConnectionType::IP_SPECIFIC:
-					_socketValues->getExternalAddress()->sin_addr.s_addr = inet_addr(_socketValues->getIP()); // Connect to IP address
+					_socketValues->getExternalAddress()->sin_addr = *((struct in_addr *)host->h_addr);
+					// _socketValues->getExternalAddress()->sin_addr.s_addr = inet_addr(_socketValues->getIP()); // Connect to IP address
 					break;
 			}
 			break;
 	}
+
+
+	/**
+	 * Clear addresses
+	 */
+	bzero(_socketValues->getLocalAddress()->sin_zero, 8);
+	bzero(_socketValues->getExternalAddress()->sin_zero, 8);
 
 	/**
 	 * Bind/Connect the socket

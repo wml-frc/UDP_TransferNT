@@ -110,7 +110,7 @@ void Network::send(DataPacket *dp) {
 			switch (*this->_connectionType) {
 
 				case ConnectionType::ANY:
-					if (sendto(*_socketValues->getSocket(), buffer, sizeof(buffer), MSG_CONFIRM, (const struct sockaddr *)_socketValues->getExternalAddress(), *_socketValues->getExternalAddressLen()) < 0) {
+					if (sendto(*_socketValues->getSocket(), buffer, sizeof(buffer), 0, (const struct sockaddr *)_socketValues->getExternalAddress(), *_socketValues->getExternalAddressLen()) < 0) {
 						setState(State::DEAD);
 						ERROR_PRINT("SEND CLIENT");
 						// std::cout << "ERROR SEND: CLIENT" << std::endl;

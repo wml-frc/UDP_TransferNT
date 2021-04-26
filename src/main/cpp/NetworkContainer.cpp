@@ -72,13 +72,13 @@ void Network::send(DataPacket *dp) {
 		case Type::SERVER:
 			if (sendto(*_socketValues->getSocket(), buffer, sizeof(buffer), 0, (struct sockaddr *)_socketValues->getExternalAddress(), *_socketValues->getExternalAddressLen()) == -1) {
 				setState(State::DEAD);
-				KILL("SEND");
+				KILL("SEND SERVER");
 			}
 			break;
 		case Type::CLIENT:
 			if (sendto(*_socketValues->getSocket(), buffer, sizeof(buffer), 0, (struct sockaddr *)NULL, *_socketValues->getExternalAddressLen()) == -1) {
 				setState(State::DEAD);
-				KILL("SEND");
+				KILL("SEND CLIENT");
 			}
 			break;
 	}
@@ -97,14 +97,14 @@ void Network::recv(DataPacket *dp) {
 			*_socketValues->getValread() = recvfrom(*_socketValues->getSocket(), buffer, sizeof(buffer), 0, (struct sockaddr *)_socketValues->getExternalAddress(), _socketValues->getExternalAddressLen());
 			if (*_socketValues->getValread() == -1) { 
 				setState(State::DEAD);
-				KILL("RECV"); 
+				KILL("RECV SERVER"); 
 			}
 			break;
 		case Type::CLIENT:
 			*_socketValues->getValread() = recvfrom(*_socketValues->getSocket(), buffer, sizeof(buffer), 0, (struct sockaddr *)NULL, NULL);
 			if (*_socketValues->getValread() == -1) { 
 				setState(State::DEAD);
-				KILL("RECV"); 
+				KILL("RECV CLIENT"); 
 			}
 			break;
 	}

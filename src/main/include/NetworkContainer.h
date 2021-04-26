@@ -1,9 +1,7 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
-#include "Socket.h"
-#include "DataPacket.h"
-#include "Serializer.h"
+#include "Handshake.h"
 #include "nt_headers.h"
 
 class Network : public Serializer {

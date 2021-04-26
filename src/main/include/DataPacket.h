@@ -15,9 +15,14 @@
  */
 struct DataPacket_H {
 	// Simple check for data
-	int16_t dataTrue = false;
-	int16_t data_buffersize = 0;
+	int16_t dataTrue[1] = {0};
+	int16_t data_buffersize[1] = {0};
+	int16_t data_packetsize[1] = {0};
+	int16_t portNum[1] = {0};
 	char version[sizeof(NETWORK_VERSION)] = NETWORK_VERSION;
+
+	// Completed handshake
+	int16_t complete[1] = {-1};
 };
 
 #define PACKETSIZE_H sizeof(DataPacket_H)

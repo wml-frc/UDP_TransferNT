@@ -53,7 +53,7 @@
 #endif
 
 /**
- * Port used to handshake with client to determin buffersize
+ * Port used to handshake with client to determin buffersize/packetSize
  */
 #ifndef HANDSHAKE_PORT
 #define HANDSHAKE_PORT 5800

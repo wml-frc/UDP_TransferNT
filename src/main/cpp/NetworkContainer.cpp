@@ -44,7 +44,6 @@ int Network::init() {
 					break;
 				case ConnectionType::IP_SPECIFIC:
 					_socketValues->getExternalAddress()->sin_addr = *((struct in_addr *)host->h_addr);
-					// _socketValues->getExternalAddress()->sin_addr.s_addr = inet_addr(_socketValues->getIP()); // Connect to IP address
 					break;
 			}
 			break;

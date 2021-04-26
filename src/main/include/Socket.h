@@ -1,6 +1,7 @@
 #ifndef SOCKET_H
 #define SOCKET_H
 #include "nt_headers.h"
+#include "DataPacket.h"
 
 /**
  * Socket values used for connecting
@@ -26,6 +27,7 @@ class Socket {
 	socklen_t *getRecvLen() { return &recvlen; }
 	struct sockaddr_in *getLocalAddress() { return &address_local; }
 	struct sockaddr_in *getExternalAddress() { return &address_local; }
+
 	socklen_t *getLocalAddressLen() { 
 		addrLocLen = sizeof(address_local);
 		return &addrLocLen;
@@ -35,7 +37,14 @@ class Socket {
 		return &addrExtLen; 
 	}
 
+	int16_t *getBufferSize() { return &bufferSize; }
+	int16_t *getPacketSize() { return &packetSize; }
+
  private:
+
+	/**
+	 * Socket Values
+	 */
 	uint16_t h_port = HANDSHAKE_PORT;
 	uint16_t port = PORT;
 	char ipaddress[IP_LEN] = SERVER_IP;
@@ -44,6 +53,12 @@ class Socket {
 	socklen_t recvlen, addrLocLen, addrExtLen;
 	struct sockaddr_in address_local, address_external;
 	bool InitHandshake = false;
+
+	/**
+	 * Transfer sizes
+	 */
+	int16_t bufferSize = DEFAULT_BUFFSIZE;
+	int16_t packetSize = PACKETSIZE;
 };
 
 

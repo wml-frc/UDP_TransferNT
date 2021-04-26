@@ -97,14 +97,16 @@ void Network::send(DataPacket *dp) {
 				case ConnectionType::ANY:
 					if (sendto(*_socketValues->getSocket(), (const char *)buffer, sizeof(buffer), MSG_CONFIRM, (const struct sockaddr *)_socketValues->getExternalAddress(), *_socketValues->getExternalAddressLen()) < 0) {
 						setState(State::DEAD);
-						KILL("SEND CLIENT");
+						// KILL("SEND CLIENT");
+						std::cout << "ERROR SEND: CLIENT" << std::endl;
 					}
 					break;
 
 					case ConnectionType::IP_SPECIFIC:
 						if (sendto(*_socketValues->getSocket(), (const char *)buffer, sizeof(buffer), MSG_CONFIRM, (const struct sockaddr *)NULL, *_socketValues->getExternalAddressLen()) < 0) {
 							setState(State::DEAD);
-							KILL("SEND CLIENT");
+							// KILL("SEND CLIENT");
+							std::cout << "ERROR SEND: CLIENT" << std::endl;
 						}
 						break;
 			}

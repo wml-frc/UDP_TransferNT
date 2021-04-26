@@ -3,7 +3,7 @@
 #include <ctime>
 
 Server server;
-Client client(Network::ConnectionType::ANY);
+Client client(Network::ConnectionType::IP_SPECIFIC);
 
 void server_func(bool sender = false) {
 	// Server server;
@@ -53,7 +53,7 @@ void client_func(bool sender = false) {
 	auto lastTime = std::chrono::system_clock::now();
 
 	// client.getSocket()->setPort(8080);
-	// client.getSocket()->setIP("191.168.178.21");
+	client.getSocket()->setIP("192.168.178.125");
 	client.init();
 	std::cout << "Connected Client" << std::endl;
 

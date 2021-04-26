@@ -27,12 +27,16 @@ int Network::init() {
 		case Type::SERVER:
 			_socketValues->getLocalAddress()->sin_family = AF_INET;
 			_socketValues->getLocalAddress()->sin_port = htons(*_socketValues->getPort());
+			std::cout << "Server Port: " << _socketValues->getLocalAddress()->sin_port << std::endl;
 			_socketValues->getLocalAddress()->sin_addr.s_addr = htonl(INADDR_ANY); // Allow any connecting addresses
+			std::cout << "Server Address: " << _socketValues->getLocalAddress()->sin_addr.s_addr << std::endl;
 			break;
 		case Type::CLIENT:
 			_socketValues->getExternalAddress()->sin_family = AF_INET;
 			_socketValues->getExternalAddress()->sin_port = htons(*_socketValues->getPort());
+			std::cout << "Server Port: " << _socketValues->getExternalAddress()->sin_port << std::endl;
 			_socketValues->getExternalAddress()->sin_addr.s_addr = inet_addr(_socketValues->getIP()); // Connect to IP address
+			std::cout << "Server Address: " << _socketValues->getExternalAddress()->sin_addr.s_addr << std::endl;
 			break;
 	}
 
@@ -53,6 +57,8 @@ int Network::init() {
 			}
 			break;
 	}
+
+	setState(State::CONNECTED);
 
 	/**
 	 * Handshake (gets buffersize)

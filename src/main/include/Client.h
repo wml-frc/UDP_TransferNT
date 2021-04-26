@@ -5,7 +5,7 @@
 
 class Client : public Network {
  public:
-	Client(ConnectionType ct = ConnectionType::ANY, bool handshake = false) : Network(Type::CLIENT, ct, handshake) {
+	Client(ConnectionType ct = ConnectionType::IP_SPECIFIC, bool handshake = false) : Network(Type::CLIENT, ct, handshake) {
 		std::cout << "UDP Client Created" << std::endl;
 	}
 

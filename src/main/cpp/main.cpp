@@ -49,6 +49,7 @@ void client_func() {
 	std::chrono::duration<double> dt;
 	auto lastTime = std::chrono::system_clock::now();
 
+	client.getSocket()->setIP("127.0.0.1");
 	client.init();
 	std::cout << "Connected Client" << std::endl;
 
@@ -62,6 +63,7 @@ void client_func() {
 
 		server.recv(&dp);
 		
+		std::cout << "Server Address IP: " << client.getSocket()->getIP() << " PORT: " << client.getSocket()->getPort() << std::endl;
 		std::cout << "Client recv char: " << dp.getCharacters(0) << std::endl;
 		std::cout << "Client recv int: " << dp.getIntegers(0) << std::endl;
 		std::cout << "Client recv bool: " << dp.getBooleans(0) << std::endl;

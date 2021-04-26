@@ -13,10 +13,14 @@ class Socket {
 	uint16_t *getHandshakePort() { return &h_port; }
 
 	void setPort(uint16_t port) { this->port = port; }
-	void setIP(char ip[IP_LEN]) { strcpy(ip, this->ipaddress); }
+	void setIP(const char ip[IP_LEN]) { 
+		for (int i = 0; i < IP_LEN; i++) {
+			this->ipaddress[i] = ip[i];
+		}
+	}
 
 	uint16_t *getPort() { return &port; }
-	char *getIP() { return ipaddress; }
+	const char *getIP() { return ipaddress; }
 	int *getSocket() { return &sock; }
 	int *getValread() { return &valread; }
 	int *getRecvLen() { return &recvlen; }

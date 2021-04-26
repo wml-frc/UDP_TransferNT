@@ -85,6 +85,6 @@
 /**
  * std error without program exit
  */
-#define ERROR_PRINT(s) fprintf(stderr, s)
+#define ERROR_PRINT(s) perror(s); printf("\n")
 
 #endif

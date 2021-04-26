@@ -28,6 +28,14 @@ model {
 
 			// Binaries
 			binaries.all {
+				if (project.hasProperty("client")) {
+					cppCompiler.define 'CLIENT_RUN'
+				} 
+				
+				if (project.hasProperty("server")) {
+					cppCompiler.define 'SERVER_RUN'
+				}
+
 				linker.args << '-pthread'
 			}
 		}

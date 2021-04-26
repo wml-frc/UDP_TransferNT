@@ -1,66 +1,21 @@
-#ifndef SOCKET_CONTAINER_H
-#define SOCKET_CONTAINER_H
+#ifndef NETWORK_H
+#define NETWORK_H
 
+#include "Socket.h"
+#include "DataPacket.h"
+#include "Serializer.h"
 #include "nt_headers.h"
 
-/**
- * Socket values used for connecting
- */
-class Socket {
- public:
-	/**
-	 * Getters (Pointer functions can be used to set values)
-	 */
-	uint16_t *getHandshakePort() { return &h_port; }
-	uint16_t *getPort() { return &port; }
-	char *getIP() { return ipaddress; }
-	int *getSocket() { return &sock; }
-	int *getValread() { return &valread; }
-	struct sockaddr_in *getLocalAddress() { return &address_local; }
-	struct sockaddr_in *getExternalAddress() { return &address_local; }
-	socklen_t *getExternalAddressLen() { return &addressExt_len; }
-
- private:
-	uint16_t h_port = HANDSHAKE_PORT;
-	uint16_t port = PORT;
-	char ipaddress[20] = SERVER_IP;
-	int sock = 0;
-	int valread;
-	struct sockaddr_in address_local, address_external;
-	socklen_t addressExt_len = sizeof(address_external);
-	bool InitHandshake = false;
-};
-
-/**
- * Data packet for handshake
- */
-struct DataPacket_H {
-	// Simple check for data
-	bool dataTrue = false;
-	int data_buffersize = 0;
-	char version[sizeof(NETWORK_VERSION)] = NETWORK_VERSION;
-};
-
-#define PACKETSIZE_H sizeof(DataPacket_H)
-
-
-/**
- * Data packet for user data
- */
-struct DataPacket {
-	char characters[BUFFSIZE]{0};
-	int integers[BUFFSIZE]{0};
-	bool booleans[BUFFSIZE]{0};
-	double doubles[BUFFSIZE]{0};
-};
-
-#define PACKETSIZE sizeof(DataPacket)
-
-class Network {
+class Network : public Serializer {
  public:
 	enum class Type {
 		SERVER = 0,
 		CLIENT
+	};
+
+	enum class ConnectionType {
+		ANY = 0,
+		IP_SPECIFIC
 	};
 
 	enum class ThreadState {
@@ -79,9 +34,10 @@ class Network {
 	/**
 	 * Construct a network with type and default state
 	 */
-	Network(Type t, bool initHandShake = false) {
+	Network(Type t, ConnectionType ct, bool initHandShake = false) {
 		_socketValues = new Socket();
 		_type = new Type(t);
+		_connectionType = new ConnectionType(ct);
 		_state = new State(State::IDLE);
 		_handShaker = initHandShake;
 	}
@@ -95,6 +51,16 @@ class Network {
 	 * Main updater for network
 	 */
 	void update();
+
+	/**
+	 * non-threaded sender for network
+	 */
+	void send(DataPacket *dp);
+
+	/**
+	 * non-threaded receive for network
+	 */
+	void recv(DataPacket *dp);
 
 	/**
 	 * KILL:connection, purges values
@@ -138,11 +104,16 @@ class Network {
 		return *_type;
 	}
 
+	ConnectionType getConnectionType() {
+		return *_connectionType;
+	}
+
  private:
 	Socket *_socketValues;
 	State *_state;
 	ThreadState *_state_t;
 	Type *_type;
+	ConnectionType *_connectionType;
 
 	bool _handShaker = false; // Are we the shaker? or the shakee? Programming jokes... love em
 

@@ -19,6 +19,14 @@ int Network::init() {
 	}
 
 	/**
+	 * Memset
+	 */
+	if (*this->_connectionType == ConnectionType::ANY) {
+		memset(_socketValues->getLocalAddress(), 0, *_socketValues->getLocalAddressLen());
+		memset(_socketValues->getExternalAddress(), 0, *_socketValues->getExternalAddressLen());
+	}
+
+	/**
 	 * Address set
 	 */
 	switch (*this->_type) {
@@ -46,8 +54,10 @@ int Network::init() {
 	/**
 	 * Clear addresses
 	 */
-	bzero(_socketValues->getLocalAddress()->sin_zero, 8);
-	bzero(_socketValues->getExternalAddress()->sin_zero, 8);
+	if (*this->_connectionType == ConnectionType::IP_SPECIFIC) {
+		bzero(_socketValues->getLocalAddress()->sin_zero, 8);
+		bzero(_socketValues->getExternalAddress()->sin_zero, 8);
+	}
 
 	/**
 	 * Bind/Connect the socket

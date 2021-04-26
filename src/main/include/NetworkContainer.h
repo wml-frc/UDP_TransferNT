@@ -108,6 +108,7 @@ class Network : public Serializer {
 
  private:
 	Socket *_socketValues;
+	Socket *_handshakeSocket;
 	State *_state;
 	ThreadState *_state_t;
 	Type *_type;

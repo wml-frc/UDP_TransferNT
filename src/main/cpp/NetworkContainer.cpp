@@ -88,7 +88,7 @@ void Network::send(DataPacket *dp) {
 		case Type::SERVER:
 			if (sendto(*_socketValues->getSocket(), (const char *)buffer, sizeof(buffer), MSG_CONFIRM, (const struct sockaddr *)_socketValues->getExternalAddress(), *_socketValues->getExternalAddressLen()) < 0) {
 				setState(State::DEAD);
-				KILL("SEND SERVER");
+				ERROR_PRINT("SEND SERVER");
 			}
 			break;
 		case Type::CLIENT:
@@ -97,16 +97,16 @@ void Network::send(DataPacket *dp) {
 				case ConnectionType::ANY:
 					if (sendto(*_socketValues->getSocket(), (const char *)buffer, sizeof(buffer), MSG_CONFIRM, (const struct sockaddr *)_socketValues->getExternalAddress(), *_socketValues->getExternalAddressLen()) < 0) {
 						setState(State::DEAD);
-						// KILL("SEND CLIENT");
-						std::cout << "ERROR SEND: CLIENT" << std::endl;
+						ERROR_PRINT("SEND CLIENT");
+						// std::cout << "ERROR SEND: CLIENT" << std::endl;
 					}
 					break;
 
 					case ConnectionType::IP_SPECIFIC:
 						if (sendto(*_socketValues->getSocket(), (const char *)buffer, sizeof(buffer), MSG_CONFIRM, (const struct sockaddr *)NULL, *_socketValues->getExternalAddressLen()) < 0) {
 							setState(State::DEAD);
-							// KILL("SEND CLIENT");
-							std::cout << "ERROR SEND: CLIENT" << std::endl;
+							ERROR_PRINT("SEND CLIENT");
+							// std::cout << "ERROR SEND: CLIENT" << std::endl;
 						}
 						break;
 			}
@@ -127,7 +127,7 @@ void Network::recv(DataPacket *dp) {
 			*_socketValues->getValread() = recvfrom(*_socketValues->getSocket(), buffer, sizeof(buffer), 0, (struct sockaddr *)_socketValues->getExternalAddress(), _socketValues->getExternalAddressLen());
 			if (*_socketValues->getValread() < 0) { 
 				setState(State::DEAD);
-				KILL("RECV SERVER"); 
+				ERROR_PRINT("RECV SERVER"); 
 			}
 			break;
 		case Type::CLIENT:
@@ -137,7 +137,7 @@ void Network::recv(DataPacket *dp) {
 						*_socketValues->getValread() = recvfrom(*_socketValues->getSocket(), (char *)buffer, sizeof(buffer), MSG_WAITALL, (struct sockaddr *)_socketValues->getExternalAddress(), _socketValues->getExternalAddressLen());
 						if (*_socketValues->getValread() < 0) { 
 							setState(State::DEAD);
-							KILL("RECV CLIENT"); 
+							ERROR_PRINT("RECV CLIENT"); 
 						}
 					break;
 
@@ -145,7 +145,7 @@ void Network::recv(DataPacket *dp) {
 					*_socketValues->getValread() = recvfrom(*_socketValues->getSocket(), (char *)buffer, sizeof(buffer), MSG_WAITALL, (struct sockaddr *)NULL, NULL);
 					if (*_socketValues->getValread() < 0) { 
 						setState(State::DEAD);
-						KILL("RECV CLIENT"); 
+						ERROR_PRINT("RECV CLIENT"); 
 					}
 					break;
 			}

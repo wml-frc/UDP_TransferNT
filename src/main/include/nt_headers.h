@@ -81,4 +81,10 @@
  */
 #define ERROR(s) fprintf(stderr, s); exit(1)
 
+
+/**
+ * std error without program exit
+ */
+#define ERROR_PRINT(s) fprintf(stderr, s)
+
 #endif

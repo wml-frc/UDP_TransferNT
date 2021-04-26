@@ -49,7 +49,7 @@ void client_func() {
 	std::chrono::duration<double> dt;
 	auto lastTime = std::chrono::system_clock::now();
 
-	client.getSocket()->setIP("192.168.178.125");
+	client.getSocket()->setIP("127.0.0.1");
 	client.init();
 	std::cout << "Connected Client" << std::endl;
 
@@ -94,14 +94,32 @@ int main() {
 
 	std::cout << "Test" << std::endl;
 
-	std::cout << "Server type: " << (int)server.getType() << std::endl;
+	#ifdef CLIENT_RUN
 	std::cout << "Client type: " << (int)client.getType() << std::endl;
+	#endif
 
-	std::thread server_t(server_func);
+	#ifdef SERVER_RUN
+		std::cout << "Server type: " << (int)server.getType() << std::endl;
+	#endif
+	
+	#ifdef CLIENT_RUN
 	std::thread client_t(client_func);
+	#endif
 
-	server_t.join();
+	#ifdef SERVER_RUN
+	std::thread server_t(server_func);
+	#endif
+
+
+	#ifdef CLIENT_RUN
 	client_t.join();
+	#endif
+	#ifdef SERVER_RUN
+	server_t.join();
+	#endif
+
+
+
 
 	return 0;
 }

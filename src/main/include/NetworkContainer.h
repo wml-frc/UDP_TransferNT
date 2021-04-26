@@ -13,6 +13,11 @@ class Network : public Serializer {
 		CLIENT
 	};
 
+	enum class ConnectionType {
+		ANY = 0,
+		IP_SPECIFIC
+	};
+
 	enum class ThreadState {
 		STOP = 0,
 		IDLE,
@@ -29,9 +34,10 @@ class Network : public Serializer {
 	/**
 	 * Construct a network with type and default state
 	 */
-	Network(Type t, bool initHandShake = false) {
+	Network(Type t, ConnectionType ct, bool initHandShake = false) {
 		_socketValues = new Socket();
 		_type = new Type(t);
+		_connectionType = new ConnectionType(ct);
 		_state = new State(State::IDLE);
 		_handShaker = initHandShake;
 	}
@@ -98,11 +104,16 @@ class Network : public Serializer {
 		return *_type;
 	}
 
+	ConnectionType getConnectionType() {
+		return *_connectionType;
+	}
+
  private:
 	Socket *_socketValues;
 	State *_state;
 	ThreadState *_state_t;
 	Type *_type;
+	ConnectionType *_connectionType;
 
 	bool _handShaker = false; // Are we the shaker? or the shakee? Programming jokes... love em
 

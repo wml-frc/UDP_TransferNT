@@ -5,7 +5,7 @@
 
 class Server : public Network {
  public:
-	Server() : Network(Type::SERVER, false) {
+	Server(bool handshake = false) : Network(Type::SERVER, ConnectionType::ANY, handshake) {
 		std::cout << "UDP Server Created" << std::endl;
 	}
 

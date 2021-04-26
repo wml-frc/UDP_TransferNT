@@ -10,12 +10,13 @@ int Network::init() {
 	/**
 	 * Clear addresses
 	 */
-	bzero(_socketValues->getLocalAddress(), sizeof(*_socketValues->getLocalAddress()));
+	memset(_socketValues->getLocalAddress(), 0, *_socketValues->getLocalAddressLen());
+	memset(_socketValues->getExternalAddress(), 0, *_socketValues->getExternalAddressLen());
 
 	/**
 	 * Create UDP socket
 	 */
-	if ((*_socketValues->getSocket() = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
+	if ((*_socketValues->getSocket() = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
 		setState(State::DEAD);
 		KILL("SOCKET ERROR");
 	}
@@ -27,16 +28,19 @@ int Network::init() {
 		case Type::SERVER:
 			_socketValues->getLocalAddress()->sin_family = AF_INET;
 			_socketValues->getLocalAddress()->sin_port = htons(*_socketValues->getPort());
-			std::cout << "Server Port: " << _socketValues->getLocalAddress()->sin_port << std::endl;
 			_socketValues->getLocalAddress()->sin_addr.s_addr = htonl(INADDR_ANY); // Allow any connecting addresses
-			std::cout << "Server Address: " << _socketValues->getLocalAddress()->sin_addr.s_addr << std::endl;
 			break;
 		case Type::CLIENT:
 			_socketValues->getExternalAddress()->sin_family = AF_INET;
 			_socketValues->getExternalAddress()->sin_port = htons(*_socketValues->getPort());
-			std::cout << "Server Port: " << _socketValues->getExternalAddress()->sin_port << std::endl;
-			_socketValues->getExternalAddress()->sin_addr.s_addr = inet_addr(_socketValues->getIP()); // Connect to IP address
-			std::cout << "Server Address: " << _socketValues->getExternalAddress()->sin_addr.s_addr << std::endl;
+			switch (*this->_connectionType) {
+				case ConnectionType::ANY:
+					_socketValues->getExternalAddress()->sin_addr.s_addr = INADDR_ANY;
+					break;
+				case ConnectionType::IP_SPECIFIC:
+					_socketValues->getExternalAddress()->sin_addr.s_addr = inet_addr(_socketValues->getIP()); // Connect to IP address
+					break;
+			}
 			break;
 	}
 
@@ -45,15 +49,21 @@ int Network::init() {
 	 */
 	switch (*this->_type) {
 		case Type::SERVER:
-			if (bind(*_socketValues->getSocket(), (struct sockaddr *)_socketValues->getLocalAddress(), sizeof(*_socketValues->getLocalAddress())) == -1) {
+			if (bind(*_socketValues->getSocket(), (struct sockaddr *)_socketValues->getLocalAddress(), *_socketValues->getLocalAddressLen()) < 0) {
 				setState(State::DEAD);
 				KILL("BIND ERROR");
 			}
 			break;
 		case Type::CLIENT:
-			if (connect(*_socketValues->getSocket(), (struct sockaddr *)_socketValues->getExternalAddress(), *_socketValues->getExternalAddressLen()) == -1) {
-				setState(State::DEAD);
-				KILL("CONNECT FAIL");
+			switch (*this->_connectionType) {
+				case ConnectionType::ANY:
+					break;
+				case ConnectionType::IP_SPECIFIC:
+					if (connect(*_socketValues->getSocket(), (struct sockaddr *)_socketValues->getExternalAddress(), *_socketValues->getExternalAddressLen()) < 0) {
+						setState(State::DEAD);
+						KILL("CONNECT FAIL");
+					}
+					break;
 			}
 			break;
 	}
@@ -76,15 +86,27 @@ void Network::send(DataPacket *dp) {
 
 	switch (*this->_type) {
 		case Type::SERVER:
-			if (sendto(*_socketValues->getSocket(), buffer, sizeof(buffer), 0, (struct sockaddr *)_socketValues->getExternalAddress(), *_socketValues->getExternalAddressLen()) == -1) {
+			if (sendto(*_socketValues->getSocket(), (const char *)buffer, sizeof(buffer), MSG_CONFIRM, (const struct sockaddr *)_socketValues->getExternalAddress(), *_socketValues->getExternalAddressLen()) < 0) {
 				setState(State::DEAD);
 				KILL("SEND SERVER");
 			}
 			break;
 		case Type::CLIENT:
-			if (sendto(*_socketValues->getSocket(), buffer, sizeof(buffer), 0, (struct sockaddr *)NULL, *_socketValues->getExternalAddressLen()) == -1) {
-				setState(State::DEAD);
-				KILL("SEND CLIENT");
+			switch (*this->_connectionType) {
+
+				case ConnectionType::ANY:
+					if (sendto(*_socketValues->getSocket(), (const char *)buffer, sizeof(buffer), MSG_CONFIRM, (const struct sockaddr *)_socketValues->getExternalAddress(), *_socketValues->getExternalAddressLen()) < 0) {
+						setState(State::DEAD);
+						KILL("SEND CLIENT");
+					}
+					break;
+
+					case ConnectionType::IP_SPECIFIC:
+						if (sendto(*_socketValues->getSocket(), (const char *)buffer, sizeof(buffer), MSG_CONFIRM, (const struct sockaddr *)NULL, *_socketValues->getExternalAddressLen()) < 0) {
+							setState(State::DEAD);
+							KILL("SEND CLIENT");
+						}
+						break;
 			}
 			break;
 	}
@@ -101,16 +123,29 @@ void Network::recv(DataPacket *dp) {
 	switch (*this->_type) {
 		case Type::SERVER:
 			*_socketValues->getValread() = recvfrom(*_socketValues->getSocket(), buffer, sizeof(buffer), 0, (struct sockaddr *)_socketValues->getExternalAddress(), _socketValues->getExternalAddressLen());
-			if (*_socketValues->getValread() == -1) { 
+			if (*_socketValues->getValread() < 0) { 
 				setState(State::DEAD);
 				KILL("RECV SERVER"); 
 			}
 			break;
 		case Type::CLIENT:
-			*_socketValues->getValread() = recvfrom(*_socketValues->getSocket(), buffer, sizeof(buffer), 0, (struct sockaddr *)NULL, NULL);
-			if (*_socketValues->getValread() == -1) { 
-				setState(State::DEAD);
-				KILL("RECV CLIENT"); 
+
+			switch (*this->_connectionType) {
+				case ConnectionType::ANY:
+						*_socketValues->getValread() = recvfrom(*_socketValues->getSocket(), (char *)buffer, sizeof(buffer), MSG_WAITALL, (struct sockaddr *)_socketValues->getExternalAddress(), _socketValues->getExternalAddressLen());
+						if (*_socketValues->getValread() < 0) { 
+							setState(State::DEAD);
+							KILL("RECV CLIENT"); 
+						}
+					break;
+
+				case ConnectionType::IP_SPECIFIC:
+					*_socketValues->getValread() = recvfrom(*_socketValues->getSocket(), (char *)buffer, sizeof(buffer), MSG_WAITALL, (struct sockaddr *)NULL, NULL);
+					if (*_socketValues->getValread() < 0) { 
+						setState(State::DEAD);
+						KILL("RECV CLIENT"); 
+					}
+					break;
 			}
 			break;
 	}

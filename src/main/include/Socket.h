@@ -23,10 +23,17 @@ class Socket {
 	const char *getIP() { return ipaddress; }
 	int *getSocket() { return &sock; }
 	int *getValread() { return &valread; }
-	int *getRecvLen() { return &recvlen; }
+	socklen_t *getRecvLen() { return &recvlen; }
 	struct sockaddr_in *getLocalAddress() { return &address_local; }
 	struct sockaddr_in *getExternalAddress() { return &address_local; }
-	socklen_t *getExternalAddressLen() { return &(addressExt_len = sizeof(address_external)); }
+	socklen_t *getLocalAddressLen() { 
+		addrLocLen = sizeof(address_local);
+		return &addrLocLen;
+	}
+	socklen_t *getExternalAddressLen() { 
+		addrExtLen = sizeof(address_external);
+		return &addrExtLen; 
+	}
 
  private:
 	uint16_t h_port = HANDSHAKE_PORT;
@@ -34,9 +41,8 @@ class Socket {
 	char ipaddress[IP_LEN] = SERVER_IP;
 	int sock = 0;
 	int valread;
-	int recvlen;
+	socklen_t recvlen, addrLocLen, addrExtLen;
 	struct sockaddr_in address_local, address_external;
-	socklen_t addressExt_len = sizeof(address_external);
 	bool InitHandshake = false;
 };
 

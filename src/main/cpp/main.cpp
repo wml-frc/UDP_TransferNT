@@ -3,9 +3,9 @@
 #include <ctime>
 
 Server server;
-Client client;
+Client client(Network::ConnectionType::ANY);
 
-void server_func() {
+void server_func(bool sender = false) {
 	// Server server;
 	// server.server_test();
 	
@@ -24,24 +24,27 @@ void server_func() {
 		currTime = std::chrono::system_clock::now();
 		dt = currTime-lastTime;
 
-		dp.setCharacters(0, 't');
-		dp.setIntegers(0, 3);
-		dp.setBooleans(0, true);
-		dp.setDecimals(0, 1.004);
-		server.send(&dp);
-
-		std::cout << "Server send char: " << dp.getCharacters(0) << std::endl;
-		std::cout << "Server send int: " << dp.getIntegers(0) << std::endl;
-		std::cout << "Server send bool: " << dp.getBooleans(0) << std::endl;
-		std::cout << "Server send decimal: " << dp.getDecimals(0) << std::endl;
-
-		std::cout << "dt: " << dt.count() << std::endl;
-		system("clear");
+		if (sender) {
+			dp.setCharacters(0, 't');
+			dp.setIntegers(0, 3);
+			dp.setBooleans(0, true);
+			dp.setDecimals(0, 1.004);
+			server.send(&dp);
+		} else {
+			server.recv(&dp);
+			std::cout << "Received from Client" << std::endl;
+			std::cout << "Server recv char: " << dp.getCharacters(0) << std::endl;
+			std::cout << "Server recv int: " << dp.getIntegers(0) << std::endl;
+			std::cout << "Server recv bool: " << dp.getBooleans(0) << std::endl;
+			std::cout << "Server recv decimal: " << dp.getDecimals(0) << std::endl;
+			system("clear");
+		}
+		// std::cout << "dt: " << dt.count() << std::endl;
 		lastTime = currTime;
 	}
 }
 
-void client_func() {
+void client_func(bool sender = false) {
 	// Client client;
 	// client.client_test();
 
@@ -49,11 +52,11 @@ void client_func() {
 	std::chrono::duration<double> dt;
 	auto lastTime = std::chrono::system_clock::now();
 
-	client.getSocket()->setIP("127.0.0.1");
+	// client.getSocket()->setIP("127.0.0.1");
 	client.init();
 	std::cout << "Connected Client" << std::endl;
 
-	// sleep(5);
+	sleep(5);
 
 	DataPacket dp;
 
@@ -61,15 +64,24 @@ void client_func() {
 		currTime = std::chrono::system_clock::now();
 		dt = currTime-lastTime;
 
-		client.recv(&dp);
-		std::cout << "Server Address IP: " << client.getSocket()->getIP() << " PORT: " << *client.getSocket()->getPort() << std::endl;
-		std::cout << "Client recv char: " << dp.getCharacters(0) << std::endl;
-		std::cout << "Client recv int: " << dp.getIntegers(0) << std::endl;
-		std::cout << "Client recv bool: " << dp.getBooleans(0) << std::endl;
-		std::cout << "Client recv decimal: " << dp.getDecimals(0) << std::endl;
+		if (sender) {
+			dp.setCharacters(0, 't');
+			dp.setIntegers(0, 3);
+			dp.setBooleans(0, true);
+			dp.setDecimals(0, 1.004);
+			client.send(&dp);
+		} else {
+			client.recv(&dp);
+			std::cout << "Received from Server" << std::endl;
+			std::cout << "Client recv char: " << dp.getCharacters(0) << std::endl;
+			std::cout << "Client recv int: " << dp.getIntegers(0) << std::endl;
+			std::cout << "Client recv bool: " << dp.getBooleans(0) << std::endl;
+			std::cout << "Client recv decimal: " << dp.getDecimals(0) << std::endl;
+			system("clear");
+		}
 
-		std::cout << "dt: " << dt.count() << std::endl;
-		system("clear");
+		// std::cout << "dt: " << dt.count() << std::endl;
+		// system("clear");
 		lastTime = currTime;
 	}
 }
@@ -94,29 +106,30 @@ int main() {
 
 	std::cout << "Test" << std::endl;
 
-	#ifdef CLIENT_RUN
+	// #ifdef CLIENT_RUN
 	std::cout << "Client type: " << (int)client.getType() << std::endl;
-	#endif
+	// #endif
 
-	#ifdef SERVER_RUN
+	// #ifdef SERVER_RUN
 		std::cout << "Server type: " << (int)server.getType() << std::endl;
-	#endif
+	// #endif
 	
-	#ifdef CLIENT_RUN
-	std::thread client_t(client_func);
-	#endif
+	// #ifdef CLIENT_RUN
+	std::thread client_t(client_func, true);
+	// #endif
 
-	#ifdef SERVER_RUN
-	std::thread server_t(server_func);
-	#endif
+	// #ifdef SERVER_RUN
+	std::thread server_t(server_func, false);
+	// #endif
 
 
-	#ifdef CLIENT_RUN
+	// #ifdef CLIENT_RUN
 	client_t.join();
-	#endif
-	#ifdef SERVER_RUN
+	// #endif
+
+	// #ifdef SERVER_RUN
 	server_t.join();
-	#endif
+	// #endif
 
 
 

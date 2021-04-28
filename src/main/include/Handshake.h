@@ -7,7 +7,8 @@
 
 class Handshake {
  public:
-	static void handShake(Socket *sock, Socket *userSock, bool server = false, bool any_con = false);
+	void handShake(Socket *userSock, bool server = false, bool any_con = false, int timeoutMicroSeconds = 100000);
+ private:
 };
 
 #endif

@@ -7,25 +7,25 @@ int Network::init() {
 	 */
 	setState(State::CONNECTING);
 
-	if (_handShaker) {
-		bool server = false;
-		bool any_con = false;
-		if (*this->_type == Type::SERVER) {
-			server = true;
-		} else {
-			server = false;
-		}
+	// if (_handShaker) {
+	// 	bool server = false;
+	// 	bool any_con = false;
+	// 	if (*this->_type == Type::SERVER) {
+	// 		server = true;
+	// 	} else {
+	// 		server = false;
+	// 	}
 
-		if (*this->_connectionType == ConnectionType::ANY) {
-			any_con = true;
-		} else {
-			any_con = false;
-		}
+	// 	if (*this->_connectionType == ConnectionType::ANY) {
+	// 		any_con = true;
+	// 	} else {
+	// 		any_con = false;
+	// 	}
 
-		std::cout << "Performing Handshake..." << std::endl;
-		Handshake::handShake(_handshakeSocket, _socketValues, server, any_con);
-		std::cout << "Handshake Complete" << std::endl;
-	}
+	// 	std::cout << "Performing Handshake..." << std::endl;
+	// 	_handshake.handShake(_socketValues, server, any_con);
+	// 	std::cout << "Handshake Complete" << std::endl;
+	// }
 
 	struct hostent *host;
 	host = (struct hostent *)gethostbyname((char *)_socketValues->getIP());
@@ -103,11 +103,6 @@ int Network::init() {
 	}
 
 	setState(State::CONNECTED);
-
-	/**
-	 * Handshake (gets buffersize)
-	 */
-	// handShake();
 }
 
 /**

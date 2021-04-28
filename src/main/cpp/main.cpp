@@ -2,8 +2,8 @@
 #include <chrono>
 #include <ctime>
 
-Server server;
-Client client(Network::ConnectionType::IP_SPECIFIC);
+Server server(true);
+Client client(Network::ConnectionType::IP_SPECIFIC, true);
 
 void server_func(bool sender = false) {
 	// Server server;
@@ -14,6 +14,7 @@ void server_func(bool sender = false) {
 	auto lastTime = std::chrono::system_clock::now();
 
 	server.init();
+	// return;
 	std::cout << "Connected Server" << std::endl;
 
 	// sleep(5);
@@ -56,8 +57,9 @@ void client_func(bool sender = false) {
 	auto lastTime = std::chrono::system_clock::now();
 
 	// client.getSocket()->setPort(8080);
-	client.getSocket()->setIP("192.168.178.125");
+	// client.getSocket()->setIP(""); // 192.168.178.125
 	client.init();
+	// return;
 	std::cout << "Connected Client" << std::endl;
 
 	DataPacket dp;

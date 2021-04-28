@@ -108,12 +108,13 @@ class Network : public Serializer {
 
  private:
 	Socket *_socketValues;
-	Socket *_handshakeSocket;
 	State *_state;
 	ThreadState *_state_t;
 	Type *_type;
 	ConnectionType *_connectionType;
 
+	// Handshake
+	Handshake _handshake;
 	bool _handShaker = false; // Are we the shaker? or the shakee? Programming jokes... love em
 
 	std::thread send_t; // send thread

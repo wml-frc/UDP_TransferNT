@@ -12,6 +12,7 @@ void server_func(bool sender = false) {
 	auto lastTime = std::chrono::system_clock::now();
 
 	server.init();
+	return;
 	std::cout << "Connected Server" << std::endl;
 
 	// sleep(5);
@@ -33,6 +34,9 @@ void server_func(bool sender = false) {
 		} else {
 			server.recv(&dp);
 			std::cout << "Received from Client" << std::endl;
+			std::cout << "Client State: " << (int)client.getState() << std::endl;
+			std::cout << "Client Thread State: " << (int)client.getState_t() << std::endl;
+
 			std::cout << "Server recv char: " << dp.getCharacters(0) << std::endl;
 			std::cout << "Server recv int: " << dp.getIntegers(0) << std::endl;
 			std::cout << "Server recv bool: " << dp.getBooleans(0) << std::endl;
@@ -54,7 +58,7 @@ void client_func(bool sender = false) {
 	// client.getSocket()->setPort(8080);
 	// client.getSocket()->setIP(""); // 192.168.178.125
 	client.init();
-	// return;
+	return;
 	std::cout << "Connected Client" << std::endl;
 
 	DataPacket dp;
@@ -123,6 +127,27 @@ int main() {
 	#ifdef SERVER_RUN
 	std::thread server_t(server_func, false);
 	#endif
+
+	DataPacket dpSend, dpRec;
+	dpSend.setDecimals(0, 1);
+
+	client.registerSend(&dpSend);
+	server.registerRecv(&dpRec);
+
+	float value = 0;
+	while(true) {
+		std::cout << "Received from client: " << dpRec.getDecimals(0) << std::endl;
+		dpSend.setDecimals(0, value);
+		value += 0.0001;
+		sleep(0.5);
+	}
+
+	// sleep(10);
+	// client.stop();
+	// sleep(10);
+	// client.start();
+	// sleep(10);
+	// client.kill();
 
 
 	#ifdef CLIENT_RUN

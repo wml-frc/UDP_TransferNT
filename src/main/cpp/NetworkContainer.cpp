@@ -83,13 +83,14 @@ void Network::initNetwork() {
 	}
 
 	setState(State::CONNECTED);
+	setState_t(ThreadState::RUNNING);
 }
 
 /**
  * @TODO: Make threaded network (Time and a half f)
  */
 void Network::update() {
-	switch(*_state) {
+	switch(_state) {
 		case State::IDLE:
 			setState_t(ThreadState::IDLE); // Will continue to loop, but will not send or receive using socket values
 			break;

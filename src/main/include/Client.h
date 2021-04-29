@@ -5,12 +5,19 @@
 
 class Client : public Network {
  public:
-	Client(ConnectionType ct = ConnectionType::IP_SPECIFIC, bool handshake = false) : Network(Type::CLIENT, ct, handshake) {
+	Client(bool thread = false, ConnectionType ct = ConnectionType::IP_SPECIFIC, bool handshake = false) : _thread(thread), Network(Type::CLIENT, ct) {
 		std::cout << "UDP Client Created" << std::endl;
 	}
 
 	Type getType() { return Network::getType(); }
 	ConnectionType getConnectionType() { return Network::getConnectionType(); }
+
+	void init();
+
+ private:
+	bool _thread;
+
+	void init_thread();
 };
 
 #endif

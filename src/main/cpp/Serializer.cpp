@@ -34,9 +34,28 @@ void Serializer::serialize(DataPacket *dp, char *data) {
 	auto *t4 = serialCycler(dp->dp.decimals, t3, false);
 }
 
+void Serializer::serialize_h(DataPacket_H *dph, char *data) {
+	auto *t1 = serialCycler(dph->dataTrue, data, false);
+	auto *t2 = serialCycler(dph->data_buffersize, t1, false);
+	auto *t3 = serialCycler(dph->data_packetsize, t2, false);
+	auto *t4 = serialCycler(dph->portNum, t3, false);
+	auto *t5 = serialCycler(dph->version, t4, false);
+	auto *t6 = serialCycler(dph->complete, t5, false);
+}
+
+
 void Serializer::deserialize(DataPacket *dp, char *data) {
 	auto *t1 = serialCycler(dp->dp.characters, data, true);
 	auto *t2 = serialCycler(dp->dp.integers, t1, true);
 	auto *t3 = serialCycler(dp->dp.booleans, t2, true);
 	auto *t4 = serialCycler(dp->dp.decimals, t3, true);
+}
+
+void Serializer::deserialize_h(DataPacket_H *dph, char *data) {
+	auto *t1 = serialCycler(dph->dataTrue, data, true);
+	auto *t2 = serialCycler(dph->data_buffersize, t1, true);
+	auto *t3 = serialCycler(dph->data_packetsize, t2, true);
+	auto *t4 = serialCycler(dph->portNum, t3, true);
+	auto *t5 = serialCycler(dph->version, t4, true);
+	auto *t6 = serialCycler(dph->complete, t5, true);
 }

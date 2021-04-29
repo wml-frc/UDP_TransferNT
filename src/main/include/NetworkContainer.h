@@ -1,10 +1,9 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
-#include "Socket.h"
-#include "DataPacket.h"
-#include "Serializer.h"
 #include "nt_headers.h"
+#include "Serializer.h"
+#include "Socket.h"
 
 class Network : public Serializer {
  public:
@@ -34,18 +33,17 @@ class Network : public Serializer {
 	/**
 	 * Construct a network with type and default state
 	 */
-	Network(Type t, ConnectionType ct, bool initHandShake = false) {
+	Network(Type t, ConnectionType ct) {
 		_socketValues = new Socket();
 		_type = new Type(t);
 		_connectionType = new ConnectionType(ct);
-		_state = new State(State::IDLE);
-		_handShaker = initHandShake;
+		this->setState(State::IDLE);
 	}
 
 	/**
 	 * Intialize the connection, also choose if the server initializes handshake or client, by default the server does it
 	 */
-	int init();
+	void initNetwork();
 
 	/**
 	 * Main updater for network
@@ -56,11 +54,21 @@ class Network : public Serializer {
 	 * non-threaded sender for network
 	 */
 	void send(DataPacket *dp);
+	
+	/**
+	 * Threaded sender for network (call once, and it will continuously send data through datapacket address)
+	 */
+	void registerSend(DataPacket *dp);
 
 	/**
 	 * non-threaded receive for network
 	 */
 	void recv(DataPacket *dp);
+
+	/**
+	 * Threaded receiver for network (call once, and it will continuosly receive data through datapacket address)
+	 */
+	void registerRecv(DataPacket *dp);
 
 	/**
 	 * KILL:connection, purges values
@@ -72,18 +80,38 @@ class Network : public Serializer {
 	/**
 	 * STOP:Connection, does not purge values
 	 */
-	void stop() {}
+	void stop() {
+		this->setState_t(ThreadState::STOP);
+		this->setState(State::IDLE);
+	}
 
 	/**
 	 * START:Connection, or restart connection again
 	 */
-	void start() {}
+	void start() {
+		this->setState_t(ThreadState::RUNNING);
+		this->setState(State::CONNECTED);
+	}
 
 	/**
 	 * Get socket
 	 */
 	Socket *getSocket() {
 		return _socketValues;
+	}
+
+	/**
+	 * Get current state of network
+	 */
+	State getState() {
+		return _state;
+	}
+
+	/**
+	 * Get current state of threads
+	 */
+	ThreadState getState_t() {
+		return _state_t;
 	}
 
  protected:
@@ -93,11 +121,7 @@ class Network : public Serializer {
 	 * Set State
 	 */
 	void setState(State st) {
-		*_state = st;
-	}
-
-	State getState() {
-		return *_state;
+		_state = st;
 	}
 
 	Type getType() {
@@ -110,23 +134,23 @@ class Network : public Serializer {
 
  private:
 	Socket *_socketValues;
-	State *_state;
-	ThreadState *_state_t;
+	State _state;
+	ThreadState _state_t;
 	Type *_type;
 	ConnectionType *_connectionType;
 
+	// Handshake
 	bool _handShaker = false; // Are we the shaker? or the shakee? Programming jokes... love em
 
 	std::thread send_t; // send thread
 	std::thread rec_t; // receive thread
 
 	void setState_t(ThreadState st) {
-		*_state_t = st;
+		_state_t = st;
 	}
 
-	ThreadState getState_t() {
-		return *_state_t;
-	}
+	void recvThreadFunc(DataPacket *dp);
+	void sendThreadFunc(DataPacket *dp);
 };
 
 #endif

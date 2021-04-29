@@ -1,6 +1,6 @@
 #include "NetworkContainer.h"
 
-int Network::init() {
+void Network::initNetwork() {
 
 	/**
 	 * Set state: Connecting
@@ -44,7 +44,6 @@ int Network::init() {
 					break;
 				case ConnectionType::IP_SPECIFIC:
 					_socketValues->getExternalAddress()->sin_addr = *((struct in_addr *)host->h_addr);
-					// _socketValues->getExternalAddress()->sin_addr.s_addr = inet_addr(_socketValues->getIP()); // Connect to IP address
 					break;
 			}
 			break;
@@ -84,98 +83,14 @@ int Network::init() {
 	}
 
 	setState(State::CONNECTED);
-
-	/**
-	 * Handshake (gets buffersize)
-	 */
-	// handShake();
-}
-
-/**
- * Send data to ip and port
- */
-void Network::send(DataPacket *dp) {
-	char buffer[PACKETSIZE];
-
-	serialize(dp, buffer);
-
-	switch (*this->_type) {
-		case Type::SERVER:
-			if (sendto(*_socketValues->getSocket(), buffer, sizeof(buffer), 0, (const struct sockaddr *)_socketValues->getExternalAddress(), *_socketValues->getExternalAddressLen()) < 0) {
-				setState(State::DEAD);
-				ERROR_PRINT("SEND SERVER");
-			}
-			break;
-		case Type::CLIENT:
-			switch (*this->_connectionType) {
-
-				case ConnectionType::ANY:
-					if (sendto(*_socketValues->getSocket(), buffer, sizeof(buffer), 0, (const struct sockaddr *)_socketValues->getExternalAddress(), *_socketValues->getExternalAddressLen()) < 0) {
-						setState(State::DEAD);
-						ERROR_PRINT("SEND CLIENT");
-						// std::cout << "ERROR SEND: CLIENT" << std::endl;
-					}
-					break;
-
-					case ConnectionType::IP_SPECIFIC:
-						if (sendto(*_socketValues->getSocket(), buffer, sizeof(buffer), 0, (const struct sockaddr *)NULL, *_socketValues->getExternalAddressLen()) < 0) {
-							setState(State::DEAD);
-							ERROR_PRINT("SEND CLIENT");
-							// std::cout << "ERROR SEND: CLIENT" << std::endl;
-						}
-						break;
-			}
-			break;
-	}
-
-	memset(buffer, 0, sizeof(buffer));
-}
-
-/**
- * Receive data from ip and port
- */
-void Network::recv(DataPacket *dp) {
-	char buffer[PACKETSIZE];
-
-	switch (*this->_type) {
-		case Type::SERVER:
-			*_socketValues->getValread() = recvfrom(*_socketValues->getSocket(), buffer, sizeof(buffer), 0, (struct sockaddr *)_socketValues->getExternalAddress(), _socketValues->getExternalAddressLen());
-			if (*_socketValues->getValread() < 0) { 
-				setState(State::DEAD);
-				ERROR_PRINT("RECV SERVER"); 
-			}
-			break;
-		case Type::CLIENT:
-
-			switch (*this->_connectionType) {
-				case ConnectionType::ANY:
-						*_socketValues->getValread() = recvfrom(*_socketValues->getSocket(), buffer, sizeof(buffer), MSG_WAITALL, (struct sockaddr *)_socketValues->getExternalAddress(), _socketValues->getExternalAddressLen());
-						if (*_socketValues->getValread() < 0) { 
-							setState(State::DEAD);
-							ERROR_PRINT("RECV CLIENT"); 
-						}
-					break;
-
-				case ConnectionType::IP_SPECIFIC:
-					*_socketValues->getValread() = recvfrom(*_socketValues->getSocket(), buffer, sizeof(buffer), 0, (struct sockaddr *)NULL, NULL);
-					if (*_socketValues->getValread() < 0) { 
-						setState(State::DEAD);
-						ERROR_PRINT("RECV CLIENT"); 
-					}
-					break;
-			}
-			break;
-	}
-
-	deserialize(dp, buffer);
-	memset(buffer, 0, sizeof(buffer));
+	setState_t(ThreadState::RUNNING);
 }
 
 /**
  * @TODO: Make threaded network (Time and a half f)
  */
 void Network::update() {
-	switch(*_state) {
+	switch(_state) {
 		case State::IDLE:
 			setState_t(ThreadState::IDLE); // Will continue to loop, but will not send or receive using socket values
 			break;

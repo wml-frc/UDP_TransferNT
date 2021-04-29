@@ -31,7 +31,7 @@
 	 * Use direct connect to ip
 	 */
 	#ifndef SERVER_IP
-	#define SERVER_IP "191.168.178.21"
+	#define SERVER_IP "127.0.0.1"
 	#endif
 #endif
 
@@ -53,7 +53,7 @@
 #endif
 
 /**
- * Port used to handshake with client to determin buffersize
+ * Port used to handshake with client to determin buffersize/packetSize
  */
 #ifndef HANDSHAKE_PORT
 #define HANDSHAKE_PORT 5800

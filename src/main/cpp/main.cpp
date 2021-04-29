@@ -3,18 +3,15 @@
 #include <ctime>
 
 Server server(true);
-Client client(Network::ConnectionType::IP_SPECIFIC, true);
+Client client(true, Network::ConnectionType::IP_SPECIFIC, true);
 
 void server_func(bool sender = false) {
-	// Server server;
-	// server.server_test();
 	
 	auto currTime = std::chrono::system_clock::now();
 	std::chrono::duration<double> dt;
 	auto lastTime = std::chrono::system_clock::now();
 
 	server.init();
-	// return;
 	std::cout << "Connected Server" << std::endl;
 
 	// sleep(5);
@@ -49,8 +46,6 @@ void server_func(bool sender = false) {
 }
 
 void client_func(bool sender = false) {
-	// Client client;
-	// client.client_test();
 
 	auto currTime = std::chrono::system_clock::now();
 	std::chrono::duration<double> dt;

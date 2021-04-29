@@ -1,8 +1,9 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
-#include "Handshake.h"
 #include "nt_headers.h"
+#include "Serializer.h"
+#include "Socket.h"
 
 class Network : public Serializer {
  public:
@@ -32,18 +33,17 @@ class Network : public Serializer {
 	/**
 	 * Construct a network with type and default state
 	 */
-	Network(Type t, ConnectionType ct, bool initHandShake = false) {
+	Network(Type t, ConnectionType ct) {
 		_socketValues = new Socket();
 		_type = new Type(t);
 		_connectionType = new ConnectionType(ct);
 		_state = new State(State::IDLE);
-		_handShaker = initHandShake;
 	}
 
 	/**
 	 * Intialize the connection, also choose if the server initializes handshake or client, by default the server does it
 	 */
-	int init();
+	void initNetwork();
 
 	/**
 	 * Main updater for network
@@ -114,7 +114,6 @@ class Network : public Serializer {
 	ConnectionType *_connectionType;
 
 	// Handshake
-	Handshake _handshake;
 	bool _handShaker = false; // Are we the shaker? or the shakee? Programming jokes... love em
 
 	std::thread send_t; // send thread

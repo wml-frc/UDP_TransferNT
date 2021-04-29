@@ -5,11 +5,18 @@
 
 class Server : public Network {
  public:
-	Server(bool handshake = false) : Network(Type::SERVER, ConnectionType::IP_SPECIFIC, handshake) {
+	Server(bool thread = false) : Network(Type::SERVER, ConnectionType::IP_SPECIFIC), _thread(thread) {
 		std::cout << "UDP Server Created" << std::endl;
 	}
 
 	Type getType() { return Network::getType(); }
+
+	void init();
+
+ private:
+	bool _thread;
+
+	void init_thread();
 };
 
 #endif

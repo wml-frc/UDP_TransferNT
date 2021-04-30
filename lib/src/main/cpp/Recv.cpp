@@ -6,9 +6,9 @@ namespace UDP_TransferNT {
 	/**
 	 * Receive data from ip and port
 	 */
-	void Network::recv(DataPacket *dp) {
+	void Network::recv(DataPacket &dp) {
 		if (this->getState() == State::DEAD) {
-			close(*this->getSocket()->getSocket());
+			close(this->getSocket().getSocket());
 			return;
 		}
 
@@ -17,28 +17,28 @@ namespace UDP_TransferNT {
 
 				char buffer[PACKETSIZE];
 
-				switch (*this->_type) {
+				switch (this->_type) {
 					case Type::SERVER:
-						*_socketValues->getValread() = recvfrom(*_socketValues->getSocket(), buffer, sizeof(buffer), 0, (struct sockaddr *)_socketValues->getExternalAddress(), _socketValues->getExternalAddressLen());
-						if (*_socketValues->getValread() < 0) { 
+						_socketValues.getValread() = recvfrom(_socketValues.getSocket(), buffer, sizeof(buffer), 0, (struct sockaddr *)&_socketValues.getExternalAddress(), &_socketValues.getExternalAddressLen());
+						if (_socketValues.getValread() < 0) { 
 							setState(State::DEAD);
 							ERROR_PRINT("RECV SERVER"); 
 						}
 						break;
 					case Type::CLIENT:
 
-						switch (*this->_connectionType) {
+						switch (this->_connectionType) {
 							case ConnectionType::ANY:
-									*_socketValues->getValread() = recvfrom(*_socketValues->getSocket(), buffer, sizeof(buffer), MSG_WAITALL, (struct sockaddr *)_socketValues->getExternalAddress(), _socketValues->getExternalAddressLen());
-									if (*_socketValues->getValread() < 0) { 
+									_socketValues.getValread() = recvfrom(_socketValues.getSocket(), buffer, sizeof(buffer), MSG_WAITALL, (struct sockaddr *)&_socketValues.getExternalAddress(), &_socketValues.getExternalAddressLen());
+									if (_socketValues.getValread() < 0) { 
 										setState(State::DEAD);
 										ERROR_PRINT("RECV CLIENT"); 
 									}
 								break;
 
 							case ConnectionType::IP_SPECIFIC:
-								*_socketValues->getValread() = recvfrom(*_socketValues->getSocket(), buffer, sizeof(buffer), 0, (struct sockaddr *)NULL, NULL);
-								if (*_socketValues->getValread() < 0) { 
+								_socketValues.getValread() = recvfrom(_socketValues.getSocket(), buffer, sizeof(buffer), 0, (struct sockaddr *)NULL, NULL);
+								if (_socketValues.getValread() < 0) { 
 									setState(State::DEAD);
 									ERROR_PRINT("RECV CLIENT"); 
 								}
@@ -47,7 +47,7 @@ namespace UDP_TransferNT {
 						break;
 				}
 
-				deserialize(dp, buffer);
+				deserialize(&dp, buffer);
 
 				memset(buffer, 0, sizeof(buffer));
 			}
@@ -57,19 +57,19 @@ namespace UDP_TransferNT {
 		}
 	}
 
-	void Network::recvThreadFunc(DataPacket *dp) {
+	void Network::recvThreadFunc(DataPacket &dp) {
 		while(this->getState() != State::DEAD) {
 			if (this->getState_t() != ThreadState::IDLE) {
 				this->recv(dp);
 			}
 		}
 
-		close(*this->getSocket()->getSocket());
+		close(this->getSocket().getSocket());
 		std::cout << "Receiver thread dead" << std::endl;
 	}
 
-	void Network::registerRecv(DataPacket *dp) {
-		std::thread recv_t(&Network::recvThreadFunc, this, dp);
+	void Network::registerRecv(DataPacket &dp) {
+		std::thread recv_t(&Network::recvThreadFunc, this, std::ref(dp));
 		recv_t.detach();
 	}
 

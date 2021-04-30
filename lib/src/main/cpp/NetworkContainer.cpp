@@ -11,12 +11,12 @@ namespace UDP_TransferNT {
 		setState(State::CONNECTING);
 
 		struct hostent *host;
-		host = (struct hostent *)gethostbyname((char *)_socketValues->getIP());
+		host = (struct hostent *)gethostbyname((char *)_socketValues.getIP());
 
 		/**
 		 * Create UDP socket
 		 */
-		if ((*_socketValues->getSocket() = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+		if ((_socketValues.getSocket() = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
 			setState(State::DEAD);
 			KILL("SOCKET ERROR");
 		}
@@ -24,29 +24,29 @@ namespace UDP_TransferNT {
 		/**
 		 * Memset
 		 */
-		if (*this->_connectionType == ConnectionType::ANY) {
-			memset(_socketValues->getLocalAddress(), 0, *_socketValues->getLocalAddressLen());
-			memset(_socketValues->getExternalAddress(), 0, *_socketValues->getExternalAddressLen());
+		if (this->_connectionType == ConnectionType::ANY) {
+			memset(&_socketValues.getLocalAddress(), 0, _socketValues.getLocalAddressLen());
+			memset(&_socketValues.getExternalAddress(), 0, _socketValues.getExternalAddressLen());
 		}
 
 		/**
 		 * Address set
 		 */
-		switch (*this->_type) {
+		switch (this->_type) {
 			case Type::SERVER:
-				_socketValues->getLocalAddress()->sin_family = AF_INET;
-				_socketValues->getLocalAddress()->sin_port = htons(*_socketValues->getPort());
-				_socketValues->getLocalAddress()->sin_addr.s_addr = htonl(INADDR_ANY); // Allow any connecting addresses
+				_socketValues.getLocalAddress().sin_family = AF_INET;
+				_socketValues.getLocalAddress().sin_port = htons(_socketValues.getPort());
+				_socketValues.getLocalAddress().sin_addr.s_addr = htonl(INADDR_ANY); // Allow any connecting addresses
 				break;
 			case Type::CLIENT:
-				_socketValues->getExternalAddress()->sin_family = AF_INET;
-				_socketValues->getExternalAddress()->sin_port = htons(*_socketValues->getPort());
-				switch (*this->_connectionType) {
+				_socketValues.getExternalAddress().sin_family = AF_INET;
+				_socketValues.getExternalAddress().sin_port = htons(_socketValues.getPort());
+				switch (this->_connectionType) {
 					case ConnectionType::ANY:
-						_socketValues->getExternalAddress()->sin_addr.s_addr = INADDR_ANY;
+						_socketValues.getExternalAddress().sin_addr.s_addr = INADDR_ANY;
 						break;
 					case ConnectionType::IP_SPECIFIC:
-						_socketValues->getExternalAddress()->sin_addr = *((struct in_addr *)host->h_addr);
+						_socketValues.getExternalAddress().sin_addr = *((struct in_addr *)host->h_addr);
 						break;
 				}
 				break;
@@ -56,27 +56,27 @@ namespace UDP_TransferNT {
 		/**
 		 * Clear addresses
 		 */
-		if (*this->_connectionType == ConnectionType::IP_SPECIFIC) {
-			bzero(_socketValues->getLocalAddress()->sin_zero, 8);
-			bzero(_socketValues->getExternalAddress()->sin_zero, 8);
+		if (this->_connectionType == ConnectionType::IP_SPECIFIC) {
+			bzero(_socketValues.getLocalAddress().sin_zero, 8);
+			bzero(_socketValues.getExternalAddress().sin_zero, 8);
 		}
 
 		/**
 		 * Bind/Connect the socket
 		 */
-		switch (*this->_type) {
+		switch (this->_type) {
 			case Type::SERVER:
-				if (bind(*_socketValues->getSocket(), (struct sockaddr *)_socketValues->getLocalAddress(), *_socketValues->getLocalAddressLen()) < 0) {
+				if (bind(_socketValues.getSocket(), (struct sockaddr *)&_socketValues.getLocalAddress(), _socketValues.getLocalAddressLen()) < 0) {
 					setState(State::DEAD);
 					KILL("BIND ERROR");
 				}
 				break;
 			case Type::CLIENT:
-				switch (*this->_connectionType) {
+				switch (this->_connectionType) {
 					case ConnectionType::ANY:
 						break;
 					case ConnectionType::IP_SPECIFIC:
-						if (connect(*_socketValues->getSocket(), (struct sockaddr *)_socketValues->getExternalAddress(), *_socketValues->getExternalAddressLen()) < 0) {
+						if (connect(_socketValues.getSocket(), (struct sockaddr *)&_socketValues.getExternalAddress(), _socketValues.getExternalAddressLen()) < 0) {
 							setState(State::DEAD);
 							KILL("CONNECT FAIL");
 						}
@@ -120,9 +120,9 @@ namespace UDP_TransferNT {
 				}
 
 				// Purge
-				close(*_socketValues->getSocket());
-				*_socketValues->getSocket() = 0;
-				memset((char *)_socketValues->getLocalAddress(), 0, sizeof(*_socketValues->getLocalAddress()));
+				close(_socketValues.getSocket());
+				_socketValues.getSocket() = 0;
+				memset((char *)&_socketValues.getLocalAddress(), 0, sizeof(_socketValues.getLocalAddress()));
 				break;
 			
 			default:

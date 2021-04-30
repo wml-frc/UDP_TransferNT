@@ -36,9 +36,8 @@ namespace UDP_TransferNT {
 		 * Construct a network with type and default state
 		 */
 		Network(Type t, ConnectionType ct) {
-			_socketValues = new Socket();
-			_type = new Type(t);
-			_connectionType = new ConnectionType(ct);
+			_type = Type(t);
+			_connectionType = ConnectionType(ct);
 			this->setState(State::IDLE);
 		}
 
@@ -55,22 +54,22 @@ namespace UDP_TransferNT {
 		/**
 		 * non-threaded sender for network
 		 */
-		void send(DataPacket *dp);
+		void send(DataPacket &dp);
 		
 		/**
 		 * Threaded sender for network (call once, and it will continuously send data through datapacket address)
 		 */
-		void registerSend(DataPacket *dp);
+		void registerSend(DataPacket &dp);
 
 		/**
 		 * non-threaded receive for network
 		 */
-		void recv(DataPacket *dp);
+		void recv(DataPacket &dp);
 
 		/**
 		 * Threaded receiver for network (call once, and it will continuosly receive data through datapacket address)
 		 */
-		void registerRecv(DataPacket *dp);
+		void registerRecv(DataPacket &dp);
 
 		/**
 		 * KILL:connection, purges values
@@ -98,7 +97,7 @@ namespace UDP_TransferNT {
 		/**
 		 * Get socket
 		 */
-		Socket *getSocket() {
+		Socket &getSocket() {
 			return _socketValues;
 		}
 
@@ -127,19 +126,19 @@ namespace UDP_TransferNT {
 		}
 
 		Type getType() {
-			return *_type;
+			return _type;
 		}
 
 		ConnectionType getConnectionType() {
-			return *_connectionType;
+			return _connectionType;
 		}
 
 	 private:
-		Socket *_socketValues;
+		Socket _socketValues;
 		State _state;
 		ThreadState _state_t;
-		Type *_type;
-		ConnectionType *_connectionType;
+		Type _type;
+		ConnectionType _connectionType;
 
 		// Handshake
 		bool _handShaker = false; // Are we the shaker? or the shakee? Programming jokes... love em
@@ -151,9 +150,10 @@ namespace UDP_TransferNT {
 			_state_t = st;
 		}
 
-		void recvThreadFunc(DataPacket *dp);
-		void sendThreadFunc(DataPacket *dp);
+		void recvThreadFunc(DataPacket &dp);
+		void sendThreadFunc(DataPacket &dp);
 	};
+	#endif
 }
 
 #endif

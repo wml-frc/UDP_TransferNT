@@ -8,7 +8,7 @@ namespace UDP_TransferNT {
 	}
 
 	void Client::init() {
-			std::cout << "Main Socket Port: " << *this->getSocket()->getPort() << std::endl;
+			std::cout << "Main Socket Port: " << this->getSocket().getPort() << std::endl;
 
 		if (_thread) {
 			std::cout << "Threaded start enabled" << std::endl;

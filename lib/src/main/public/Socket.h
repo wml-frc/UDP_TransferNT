@@ -13,7 +13,7 @@ namespace UDP_TransferNT {
 		/**
 		 * Getters (Pointer functions can be used to set values)
 		 */
-		uint16_t *getHandshakePort() { return &h_port; }
+		uint16_t getHandshakePort() { return h_port; }
 
 		void setPort(uint16_t port) { this->port = port; }
 		void setIP(const char ip[IP_LEN]) {
@@ -22,25 +22,25 @@ namespace UDP_TransferNT {
 			}
 		}
 
-		uint16_t *getPort() { return &port; }
+		uint16_t getPort() { return port; }
 		const char *getIP() { return ipaddress; }
-		int *getSocket() { return &sock; }
-		int *getValread() { return &valread; }
-		socklen_t *getRecvLen() { return &recvlen; }
-		struct sockaddr_in *getLocalAddress() { return &address_local; }
-		struct sockaddr_in *getExternalAddress() { return &address_local; }
+		int &getSocket() { return sock; }
+		int &getValread() { return valread; }
+		socklen_t &getRecvLen() { return recvlen; }
+		struct sockaddr_in &getLocalAddress() { return address_local; }
+		struct sockaddr_in &getExternalAddress() { return address_local; }
 
-		socklen_t *getLocalAddressLen() { 
+		socklen_t &getLocalAddressLen() { 
 			addrLocLen = sizeof(address_local);
-			return &addrLocLen;
+			return addrLocLen;
 		}
-		socklen_t *getExternalAddressLen() { 
+		socklen_t &getExternalAddressLen() { 
 			addrExtLen = sizeof(address_external);
-			return &addrExtLen; 
+			return addrLocLen; 
 		}
 
-		int16_t *getBufferSize() { return &bufferSize; }
-		int16_t *getPacketSize() { return &packetSize; }
+		int16_t &getBufferSize() { return bufferSize; }
+		int16_t &getPacketSize() { return packetSize; }
 
 	 private:
 

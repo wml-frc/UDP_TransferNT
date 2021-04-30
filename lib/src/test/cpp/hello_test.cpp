@@ -23,8 +23,8 @@ int main() {
 	client.init();
 	server.init();
 
-	client.registerSend(&dpSend);
-	server.registerRecv(&dpRecv);
+	client.registerSend(dpSend);
+	server.registerRecv(dpRecv);
 
 	float value = 0;
 

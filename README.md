@@ -26,7 +26,7 @@ However, you can link the cpp and public folders using another means if you wish
 
 Server
 ```cpp
-#include "UDP_TransferNT.h
+#include "UDP_TransferNT.h"
 
 UDP_TransferNT::Server server; // Create server
 UDP_TransferNT::DataPacket dpSend;
@@ -48,7 +48,7 @@ server.send(dpSend); // Send the data packet
 
 Client
 ```cpp
-#include "UDP_TransferNT.h
+#include "UDP_TransferNT.h"
 
 UDP_TransferNT::Client client; // Create client
 UDP_TransferNT::DataPacket dpRecv; // Create the receiving datapacket
@@ -82,7 +82,7 @@ std::cout << dpRecv.getIntegers(3) << std::endl;
 
 Server
 ```cpp
-#include "UDP_TransferNT.h
+#include "UDP_TransferNT.h"
 
 UDP_TransferNT::Server server(true); // Create server, (And set threading to true, so it will continue the rest of the program while it's still binding to the socket)
 UDP_TransferNT::DataPacket dpSend;
@@ -101,7 +101,7 @@ while (true) {
 
 Client
 ```cpp
-#include "UDP_TransferNT.h
+#include "UDP_TransferNT.h"
 
 UDP_TransferNT::Client client(true); // Create client
 UDP_TransferNT::DataPacket dpRecv; // Create the receiving datapacket

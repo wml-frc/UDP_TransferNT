@@ -22,19 +22,21 @@ int main() {
 	UDP_TransferNT::Client client(true);
 	UDP_TransferNT::Server server(true);
 
-	#ifdef CLIENT
+	#ifdef CLIENT_
+	client.getSocket().setIP("192.168.178.125");
+	client.getSocket().setPort(5801);
 	client.init();
 	#endif
 
-	#ifdef SERVER
+	#ifdef SERVER_
 	server.init();
 	#endif
 
-	#ifdef CLIENT
+	#ifdef CLIENT_
 	client.registerSend(dpSend);
 	#endif
 
-	#ifdef SERVER
+	#ifdef SERVER_
 	server.registerRecv(dpRecv);
 	#endif
 
@@ -44,7 +46,7 @@ int main() {
 		system("clear");
 		std::cout << "Registered client sender, and server receiver" << std::endl;
 
-		#ifdef CLIENT
+		#ifdef SERVER_
 		std::cout << "Booleans index 1: " << dpRecv.getBooleans(1) << std::endl;
 		std::cout << "Characters index 10: " << dpRecv.getCharacters(10) << std::endl;
 		std::cout << "Decimals index 0: " << dpRecv.getDecimals(0) << std::endl;

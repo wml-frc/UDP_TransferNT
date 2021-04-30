@@ -8,4 +8,3 @@
  */
 
 rootProject.name = 'UDP_TransferNT'
-include('lib')

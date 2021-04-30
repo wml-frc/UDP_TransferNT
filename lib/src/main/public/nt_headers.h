@@ -1,6 +1,8 @@
 #ifndef NT_HEADERS
 #define NT_HEADERS
 
+#ifdef __linux__
+
 #include <iostream>
 
 // Server headers
@@ -14,6 +16,8 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <tuple>
+
+#endif // __linux__
 
 // Threading
 #include <thread>
@@ -90,4 +94,4 @@
  */
 #define ERROR_PRINT(s) perror(s); printf("\n")
 
-#endif
+#endif // NT_HEADER

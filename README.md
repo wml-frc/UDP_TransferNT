@@ -8,7 +8,7 @@
 e.g
 ```gradle
 dependencies {
-	implementation project('UDP_TransferNT')
+	implementation project(':UDP_TransferNT')
 }
 ```
 

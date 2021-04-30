@@ -1,6 +1,6 @@
 # UDP Transfer Network
 
-### Built for fast passed data streams between two or more devices
+### Built for fast paced data streams between two or more devices
 
 #### Adding the lib
 - This is a shared library built using gradle, and can be added as a dependency. See https://docs.gradle.org/current/userguide/declaring_dependencies.html for details

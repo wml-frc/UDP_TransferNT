@@ -2,6 +2,9 @@
 
 ### Built for fast paced data streams between two or more devices
 
+#### Build Status
+[![Build Status](https://dev.azure.com/ConnorBuchel0890/WML/_apis/build/status/wml-frc.UDP_TransferNT?branchName=refs%2Fpull%2F5%2Fmerge)](https://dev.azure.com/ConnorBuchel0890/WML/_build/latest?definitionId=16&branchName=refs%2Fpull%2F5%2Fmerge)
+
 #### Adding the lib
 - This is a shared library built using gradle, and can be added as a dependency. See https://docs.gradle.org/current/userguide/declaring_dependencies.html for details
 

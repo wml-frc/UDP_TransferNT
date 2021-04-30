@@ -78,6 +78,8 @@ namespace UDP_TransferNT {
 					case ConnectionType::IP_SPECIFIC:
 						if (connect(_socketValues.getSocket(), (struct sockaddr *)&_socketValues.getExternalAddress(), _socketValues.getExternalAddressLen()) < 0) {
 							setState(State::DEAD);
+							std::cout << "Extern Len: " << _socketValues.getExternalAddressLen() << std::endl;
+							std::cout << "Real extern len: " << sizeof(_socketValues.getExternalAddress()) << std::endl;
 							KILL("CONNECT FAIL");
 						}
 						break;

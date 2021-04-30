@@ -7,6 +7,9 @@ namespace UDP_TransferNT {
 	 * Send data to ip and port
 	 */
 	void Network::send(DataPacket &dp) {
+		DataPacket dpBuff;
+		dpBuff = dp;
+
 		if (this->getState() == State::DEAD) {
 			close(this->getSocket().getSocket());
 			return;
@@ -15,7 +18,7 @@ namespace UDP_TransferNT {
 		if (this->getState() == State::CONNECTED) {
 			if (this->getState_t() == ThreadState::RUNNING) {
 				char buffer[PACKETSIZE];
-				serialize(&dp, buffer);
+				serialize(dpBuff, buffer);
 
 
 				switch (this->_type) {

@@ -11,14 +11,14 @@ namespace UDP_TransferNT {
 		/**
 		 * Serialize data into one long character array to be sent over
 		 */
-		static void serialize(DataPacket *dp, char *data);
-		static void serialize_h(DataPacket_H *dp, char *data);
+		static void serialize(DataPacket &dp, char *data);
+		static void serialize_h(DataPacket_H &dp, char *data);
 
 		/**
 		 * Deserialize data from one long character array to datapacket
 		 */
-		static void deserialize(DataPacket *dp, char *data);
-		static void deserialize_h(DataPacket_H *dp, char *data);
+		static void deserialize(DataPacket &dp, char *data);
+		static void deserialize_h(DataPacket_H &dp, char *data);
 
 		
 		/**

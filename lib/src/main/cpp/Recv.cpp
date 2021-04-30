@@ -7,6 +7,9 @@ namespace UDP_TransferNT {
 	 * Receive data from ip and port
 	 */
 	void Network::recv(DataPacket &dp) {
+		DataPacket dpBuff;
+		dpBuff = dp;
+
 		if (this->getState() == State::DEAD) {
 			close(this->getSocket().getSocket());
 			return;
@@ -47,9 +50,9 @@ namespace UDP_TransferNT {
 						break;
 				}
 
-				deserialize(&dp, buffer);
-
+				deserialize(dpBuff, buffer);
 				memset(buffer, 0, sizeof(buffer));
+				dp = dpBuff;
 			}
 		} else {
 			// std::cout << "Cannot Receive, not connected" << std::endl;

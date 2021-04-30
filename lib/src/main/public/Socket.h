@@ -36,7 +36,7 @@ namespace UDP_TransferNT {
 		}
 		socklen_t &getExternalAddressLen() { 
 			addrExtLen = sizeof(address_external);
-			return addrLocLen; 
+			return addrExtLen; 
 		}
 
 		int16_t &getBufferSize() { return bufferSize; }

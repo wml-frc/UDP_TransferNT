@@ -7,7 +7,7 @@ plugins {
 }
 
 library {
-	linkage = [Linkage.SHARED]
+	linkage = [Linkage.SHARED, Linkage.STATIC]
 
 	targetMachines = [
 		machines.linux.x86_64,
@@ -31,12 +31,23 @@ library {
 	baseName = "UDP_TransferNT"
 }
 
-// unitTest {
-// 	dependencies {
-// 		implementation library("UDP_TransferNT")
-// 	}
-// 	baseName = "UDP_TransferNT_Test"
-// }
+unitTest {
+
+	targetMachines = [
+		machines.linux.x86_64
+		// machines.windows.x86, machines.windows.x86_64,
+		// machines.macOS.x86_64
+	]
+
+	source {
+		def cppTree = project.fileTree('lib/src/test/cpp')
+		cppTree.include "**/*.c"
+		cppTree.include "**/*.cc"
+		cppTree.include "**/*.cpp"
+
+		from cppTree
+	}
+}
 
 tasks.withType(LinkExecutable).configureEach {
 	linkerArgs.add '-pthread'

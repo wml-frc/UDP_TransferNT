@@ -1,7 +1,5 @@
 apply plugin: 'maven-publish'
 
-// apply from: 'config.gradle'
-
 /** Zip cpp files */
 task cppSourcesZip(type: Zip) {
 	destinationDirectory = outputsFolder

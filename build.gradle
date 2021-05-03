@@ -13,6 +13,7 @@ plugins {
 }
 
 apply from: 'config.gradle'
+apply from: 'vendor.gradle'
 
 allprojects {
 
@@ -22,7 +23,7 @@ allprojects {
 	publishing {
 		repositories {
 			maven {
-				url = "https://panel.repsy.io/mvn/wml-frc/udp_transfernt"
+				url = mavenUrl
 				credentials {
 					username = user
 					password = pass

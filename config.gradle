@@ -2,12 +2,17 @@
 
 // Artifact Config
 ext.baseArtifactId = 'UDP_TransferNT-cpp'
+ext.depsArtifactId = 'UDP_TransferNT-Deps'
 ext.artifactGroupId = 'gradle.cpp'
+ext.artifactGroupIdURL = 'gradle/cpp'
 ext.zipBaseName = 'udp_transfer_nt-cpp'
 
 
 // Zip config (output directory)
 ext.outputsFolder = file("$project.buildDir/outputs")
+
+// Maven url
+ext.mavenUrl = "https://panel.repsy.io/mvn/wml-frc/udp_transfernt"
 
 // Creds
 ext.user = "$username"

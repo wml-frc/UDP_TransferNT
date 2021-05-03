@@ -1,10 +1,6 @@
 apply plugin: 'maven-publish'
 
-def baseArtifactId = 'UDP_TransferNT-cpp'
-def artifactGroupId = 'cj.gradle.udp_trasnfernt'
-def zipBaseName = 'udp_transfer_nt-cpp'
-
-def outputsFolder = file("$project.buildDir/outputs")
+// apply from: 'config.gradle'
 
 /** Zip cpp files */
 task cppSourcesZip(type: Zip) {
@@ -41,30 +37,12 @@ build.dependsOn cppSourcesZip
 publishing {
 	publications {
 		UDP_TransferNT(MavenPublication) {
-			groupId = artifactGroupId
 			artifactId = baseArtifactId
-
-			version = "0.1"
 
 			artifact cppHeadersZip
 			artifact cppSourcesZip
-
-			// pom {
-			// 	name = "UDP_TransferNT"
-			// 	description = "UDP Networking between two or more devices using threaded and non threaded send/recv calls"
-			// }
 		}
 	}
-
-	// repositories {
-	// 	maven {
-	// 		url = "https://maven.pkg.jetbrains.space/wml-frc/p/udp-transfer-nt"
-	// 		credentials {
-	// 			username = "$username"
-	// 			password = "$password"
-	// 		}
-	// 	}
-	// }
 }
 
 publish.dependsOn build

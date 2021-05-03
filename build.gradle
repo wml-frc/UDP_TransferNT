@@ -12,6 +12,30 @@ plugins {
 	id 'base'
 }
 
+apply from: 'config.gradle'
+
+allprojects {
+
+	group = artifactGroupId
+	version = artifactVersion
+
+	publishing {
+		repositories {
+			maven {
+				url = "https://panel.repsy.io/mvn/wml-frc/udp_transfernt"
+				credentials {
+					username = user
+					password = pass
+				}
+			}
+
+			publications.all {
+				groupId project.group
+			}
+		}
+	}
+}
+
 library {
 	linkage = [Linkage.SHARED, Linkage.STATIC]
 

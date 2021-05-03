@@ -1,0 +1,53 @@
+import groovy.json.JsonOutput
+
+Map<String, Object> vendorJson() {
+	return [
+		fileName: "UDP_TransferNT.json",
+		name: "UDP_TransferNT",
+		version: project.version,
+		uuid: "",
+		mavenUrls: [
+			mavenUrl
+		],
+
+		jsonUrl: "${mavenUrl}/${artifactGroupIdURL}/${depsArtifactId}/${project.version}/${depsArtifactId}-${project.version}.json",
+		cppDependencies: [
+			[
+				groupId: project.group,
+				artifactId: baseArtifactId,
+				version: project.version,
+				libName: "UDP_TransferNT",
+				headerClassifier: "headers",
+				sharedLibrary: true,
+				skipInvalidPlatforms: true,
+				binaryPlatforms: [
+					"linuxx86-64"
+				]
+			]
+		]
+	]
+}
+
+String vendorJsonString() {
+	return JsonOutput.prettyPrint(JsonOutput.toJson(vendorJson()))
+}
+
+task generateVendorDepsJson() {
+	def outfile = new File(buildDir, "UDP_TransferNT.json")
+	outputs.file(outfile)
+
+	doLast {
+		outfile.text = vendorJsonString()
+	}
+}
+
+publishing {
+	publications {
+		vendordeps(MavenPublication) {
+			artifactId 'UDP_TransferNT-Deps'
+			artifact(generateVendorDepsJson.outputs.files.files[0]) {
+				builtBy generateVendorDepsJson
+			}
+		}
+	}
+}

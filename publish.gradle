@@ -1,0 +1,46 @@
+apply plugin: 'maven-publish'
+
+/** Zip cpp files */
+task cppSourcesZip(type: Zip) {
+	destinationDirectory = outputsFolder
+	archiveBaseName = zipBaseName
+	classifier = "sources"
+
+	from('lib/src/main/cpp') {
+		into '/'
+	}
+}
+
+/** Zip header files */
+task cppHeadersZip(type: Zip) {
+	destinationDirectory = outputsFolder
+	archiveBaseName = zipBaseName
+	classifier = "headers"
+
+	ext.includeDirs = [
+		project.file('lib/src/main/public')
+	]
+
+	ext.includeDirs.each {
+		from(it) {
+			into '/'
+		}
+	}
+}
+
+build.dependsOn cppHeadersZip
+build.dependsOn cppSourcesZip
+
+
+publishing {
+	publications {
+		UDP_TransferNT(MavenPublication) {
+			artifactId = baseArtifactId
+
+			artifact cppHeadersZip
+			artifact cppSourcesZip
+		}
+	}
+}
+
+publish.dependsOn build

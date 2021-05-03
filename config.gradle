@@ -14,9 +14,8 @@ ext.outputsFolder = file("$project.buildDir/outputs")
 // Maven url
 ext.mavenUrl = "https://panel.repsy.io/mvn/wml-frc/udp_transfernt"
 
-// Creds
-ext.user = "$username"
-ext.pass = "$password"
+ext.user = System.getProperty("username")
+ext.pass = System.getProperty("password")
 
 // Version
 ext.artifactVersion = "2021.1.1"

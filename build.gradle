@@ -85,4 +85,4 @@ tasks.withType(LinkExecutable).configureEach {
 }
 
 // Library publishing
-apply from: "${rootDir}/publish.gradle"
+apply from: "publish.gradle"

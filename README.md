@@ -5,8 +5,21 @@
 #### Build Status
 [![Build Status](https://dev.azure.com/ConnorBuchel0890/WML/_apis/build/status/wml-frc.UDP_TransferNT?branchName=refs%2Fpull%2F5%2Fmerge)](https://dev.azure.com/ConnorBuchel0890/WML/_build/latest?definitionId=16&branchName=refs%2Fpull%2F5%2Fmerge)
 
-#### Adding the lib
-- This is a shared library built using gradle, and can be added as a dependency. See https://docs.gradle.org/current/userguide/declaring_dependencies.html for details
+#### Adding the lib as vendordep
+- For FRC teams this library is stored in a maven repository, which can be added to vendordeps. Check https://docs.wpilib.org/en/stable/docs/software/vscode-overview/3rd-party-libraries.html on how to add the vendordep. Using this link -> `https://temp.json`
+
+#### Adding the lib as submodule dependency
+- If you're wanting to use a specific branch, or for developers who want to contribute. You can add the project as a submodule, and include it as a dependency. See https://docs.gradle.org/current/userguide/declaring_dependencies.html for details on the library dependency.
+
+- 1. use `git submodule add https://github.com/wml-frc/UDP_TransferNT.git ./SUB_LOCATION`
+- 2. Include in root project
+
+settings.gradle
+```grale
+include ':UDP_TransferNT'
+```
+
+- 3. Add dependency to project
 
 e.g
 ```gradle
@@ -15,24 +28,51 @@ dependencies {
 }
 ```
 
-However, you can link the cpp and public folders using another means if you wish to use it without gradle. (All cpp is written using linux std libraries, in a linux environment)
+- or as a proper static/shared library in the binaries
+```gradle
+model {
+	components {
+		frcUserProgram(NativeExecutableSpec) {
+			...
+
+			binaries.all {
+				// Or option one (more controlled for use case)
+				lib project: ':UDP_TransferNT', library: 'UDP_TransferNT', linkage: 'shared' // Can also be static
+
+				// Option two (May not work in certain applications)
+				lib library: 'UDP_TransferNT'
+			}
+		}
+	}
+}
+```
+
+
+#### Manual addition.
+However, if none of the above options work you can link the cpp and public folders using another means if you wish to use it without gradle. (All cpp is written using linux std libraries, in a linux environment) So there are no special requirements.
 
 ### Usage
 
 - UDP transfer does not require a handshake between two devices, it will send the data to a port without regard, and anything listening on that port will receive data. This transfer system, is best used when the client tries to send the data to the servers IP. especially for programs like FRC where the data can be affected by other traffic.
 
-- In cpp, include the UDP_TransferNT.h file and create either a server or a client. The process for sending data should be as simple as init(), create a datapacket and then send().
+- In cpp, include the UDP_TransferNT.h file and create either a server or a client. The process for sending data should be as simple as initializing either a server or client, creating a datapacket and then sending/receiving that datapacket.
 
 
 #### Basic single threaded send/recv using server & client
 
+##### Config
+- Server is our sender
+- Client is out receiver
+- Port: `5801` <- Default
+- IP: `192.168.178.125` <- default is `127.0.0.1`
+- Buffer size/array sizes: `512` <- default 
 
 Server
 ```cpp
 #include "UDP_TransferNT.h"
 
 UDP_TransferNT::Server server; // Create server
-UDP_TransferNT::DataPacket dpSend;
+UDP_TransferNT::DataPacket dpSend; // Our datapacket which we will be sending
 
 server.init(); // Create the socket and bind to it (Default port is 5801)
 
@@ -61,7 +101,7 @@ UDP_TransferNT::DataPacket dpRecv; // Create the receiving datapacket
  */
 client.getSocket().setIP("192.168.178.125"); // .setPort() is also available to switch port from 5801 to something else (Socket setters, must be accessed before the client is initialized, or the socket will be bound to the wrong place!)
 
-client.init();
+client.init(); // Create the socket and connect to ip address
 
 client.recv(dpRecv); // Listen for datapacket (Will stop program and wait)
 
@@ -75,11 +115,11 @@ std::cout << dpRecv.getIntegers(2) << std::endl;
 std::cout << dpRecv.getIntegers(3) << std::endl;
 ```
 
-- The above example, showed how to use the most basic setup. However, it has the issue of waiting until data has been sent before the program can continue. And what if it is a continous stream of data? This is where registering comes into play. You can register a datapacket to be send or received, and it will be put onto a seperate thread which will continously send or receive data. You can put the regular send and receive functions into while loops, but they will hault your program until they are finished receiving data. Which is slow and tedious
+- The above example, shows how to use the most basic setup. However, it has the issue of waiting until data has been sent before the program can continue. And in programs with a constant data stream between the devices looping these functions can slow the program down. To solve this we can register a datapacket to be sent or received, and it will be put the send/recv functions onto a seperate thread which will loop continously sending or receiving data in the background.
 
-- It should also be mentioned that the client/server init() functions can also hault the program if they're taking too long to connect/bind to a socket. When constructing them, you can set the first parameter to `true` to solve this, which will also temporarily put the init function on a seperate thread until it's complete.
+- It should also be mentioned that the client/server init() functions can also hault the program if they're taking too long to connect/bind to a socket. When constructing them, you can set the first parameter to `true`, which will also temporarily put the init function on a seperate thread before joining back into the main thread when it's finished binding/connecting.
 
-- Not only can you register datapackets, but you can control the send/recv threads later using inbuilt functions, to pause, continue, or kill the connection outright.
+- Not only can you register datapackets, but you can control the registered send/recv threads later using the built in thread functions, to pause, continue, or kill the connection outright.
 
 #### Multi-threaded registering/receiving of data
 
@@ -88,7 +128,7 @@ Server
 #include "UDP_TransferNT.h"
 
 UDP_TransferNT::Server server(true); // Create server, (And set threading to true, so it will continue the rest of the program while it's still binding to the socket)
-UDP_TransferNT::DataPacket dpSend;
+UDP_TransferNT::DataPacket dpSend; // Our datapacket which we will be sending
 
 server.init(); // Initialize with values
 float value = 0.001; // Our value that we're sending
@@ -123,7 +163,7 @@ while (true) {
 }
 ```
 
-- After registered threads have been launched, you can modify them using the following (This controls all threads sending/receiving threads, not just the registered)
+- After registered threads have been launched, you can modify them using the following (This controls all threads associated with the objects sending/receiving threads, not just the registered) WILL HAULT GENERIC SEND/RECV FUNCTIONS
 
 ```cpp
 // Can be server or client
@@ -196,5 +236,4 @@ void getSocket().setIP(const char ip[IP_LEN]); // sets the ip of the server
 #define KILL(s) perror(s); exit(1) // Kills the program with a message
 #define ERROR(s) fprintf(stderr, s); exit(1) // Print the current error and kill the program
 #define ERROR_PRINT(s) perror(s); printf("\n") // Prints the current error but does not exit the program
-
 ```

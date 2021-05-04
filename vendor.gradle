@@ -5,7 +5,7 @@ Map<String, Object> vendorJson() {
 		fileName: "UDP_TransferNT.json",
 		name: "UDP_TransferNT",
 		version: project.version,
-		uuid: "",
+		uuid: "d7e51e9d-c0f6-4f51-96f1-cf2beab44a24",
 		mavenUrls: [
 			mavenUrl
 		],

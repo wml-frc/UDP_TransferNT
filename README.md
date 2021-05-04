@@ -185,7 +185,7 @@ server.kill() // Kill the process. Stops the threads, sets the sate of the progr
  * Generic network
  */
 Server(bool thread = false); // Server constructor, optional thread init
-Client(bool thread = false, ConnectionType ct = ConnectionType::IP_SPECIFIC, bool handshake = false); // Client constructor, optional thread init, select different connectiontype (ANY/IP_SPECIFIC) and use handshake (still in development to set the client to the servers buffer and packet size)
+Client(bool thread = false, ConnectionType ct = ConnectionType::IP_SPECIFIC); // Client constructor, optional thread init, select different connectiontype (ANY/IP_SPECIFIC)
 void init(); // Used for server or client instances, initializes the network either on a seperate thread or same thread depending on constructed network
 Network(Type t, ConnectionType ct); // Generic network connection, takes type (SERVER or CLIENT) and connection type (ANY/IP_SPECIFIC)
 Type getType(); // Returns the type of network (SERVER/CLIENT)

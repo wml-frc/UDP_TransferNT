@@ -143,8 +143,8 @@ namespace UDP_TransferNT {
 		// Handshake
 		bool _handShaker = false; // Are we the shaker? or the shakee? Programming jokes... love em
 
-		std::thread send_t; // send thread
-		std::thread rec_t; // receive thread
+		// std::thread send_t; // send thread
+		// std::thread rec_t; // receive thread
 
 		void setState_t(ThreadState st) {
 			_state_t = st;

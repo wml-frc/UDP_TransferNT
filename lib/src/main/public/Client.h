@@ -7,7 +7,8 @@ namespace UDP_TransferNT {
 	#ifdef __linux__
 	class Client : public Network {
 	 public:
-		Client(bool thread = false, ConnectionType ct = ConnectionType::IP_SPECIFIC, bool handshake = false) : _thread(thread), Network(Type::CLIENT, ct) {
+		Client(bool thread = false, ConnectionType ct = ConnectionType::IP_SPECIFIC) : Network(Type::CLIENT, ct) {
+			this->_thread = thread;
 			std::cout << "UDP Client Created" << std::endl;
 		}
 
@@ -17,7 +18,7 @@ namespace UDP_TransferNT {
 		void init();
 
 	private:
-		bool _thread;
+		bool _thread = false;
 
 		void init_thread();
 	};
@@ -26,7 +27,8 @@ namespace UDP_TransferNT {
 
 	class Client : public Network {
 	 public:
-		Client(bool thread = false, ConnectionType ct = ConnectionType::IP_SPECIFIC, bool handshake = false) : _thread(thread), Network(Type::CLIENT, ct) {
+		Client(bool thread = false, ConnectionType ct = ConnectionType::IP_SPECIFIC) : Network(Type::CLIENT, ct) {
+			this->_thread = thread;
 			std::cout << "UDP Client runs only on linux" << std::endl;
 		}
 
@@ -38,7 +40,7 @@ namespace UDP_TransferNT {
 		void recv(DataPacket *dp) {}
 
 	private:
-		bool _thread;
+		bool _thread = false;
 	};
 	#endif
 }

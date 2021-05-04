@@ -13,54 +13,54 @@ namespace UDP_TransferNT {
 		/**
 		 * Getters (Pointer functions can be used to set values)
 		 */
-		uint16_t getHandshakePort() { return h_port; }
+		uint16_t getHandshakePort() { return this->_h_port; }
 
-		void setPort(uint16_t port) { this->port = port; }
+		void setPort(uint16_t port) { this->_port = port; }
 		void setIP(const char ip[IP_LEN]) {
 			for (int i = 0; i < IP_LEN; i++) {
-				this->ipaddress[i] = ip[i];
+				this->_ipaddress[i] = ip[i];
 			}
 		}
 
-		uint16_t getPort() { return port; }
-		const char *getIP() { return ipaddress; }
-		int &getSocket() { return sock; }
-		int &getValread() { return valread; }
-		socklen_t &getRecvLen() { return recvlen; }
-		struct sockaddr_in &getLocalAddress() { return address_local; }
-		struct sockaddr_in &getExternalAddress() { return address_local; }
+		uint16_t getPort() { return _port; }
+		const char *getIP() { return _ipaddress; }
+		int &getSocket() { return _sock; }
+		int &getValread() { return _valread; }
+		socklen_t &getRecvLen() { return _recvlen; }
+		struct sockaddr_in &getLocalAddress() { return _address_local; }
+		struct sockaddr_in &getExternalAddress() { return _address_local; }
 
 		socklen_t &getLocalAddressLen() { 
-			addrLocLen = sizeof(address_local);
-			return addrLocLen;
+			_addrLocLen = sizeof(_address_local);
+			return _addrLocLen;
 		}
 		socklen_t &getExternalAddressLen() { 
-			addrExtLen = sizeof(address_external);
-			return addrExtLen; 
+			_addrExtLen = sizeof(_address_external);
+			return _addrExtLen; 
 		}
 
-		int16_t &getBufferSize() { return bufferSize; }
-		int16_t &getPacketSize() { return packetSize; }
+		int16_t &getBufferSize() { return _bufferSize; }
+		int16_t &getPacketSize() { return _packetSize; }
 
 	 private:
 
 		/**
 		 * Socket Values
 		 */
-		uint16_t h_port = HANDSHAKE_PORT;
-		uint16_t port = PORT;
-		char ipaddress[IP_LEN] = SERVER_IP;
-		int sock = 0;
-		int valread;
-		socklen_t recvlen, addrLocLen, addrExtLen;
-		struct sockaddr_in address_local, address_external;
-		bool InitHandshake = false;
+		uint16_t _h_port = HANDSHAKE_PORT;
+		uint16_t _port = PORT;
+		char _ipaddress[IP_LEN] = SERVER_IP;
+		int _sock = 0;
+		int _valread;
+		socklen_t _recvlen, _addrLocLen, _addrExtLen;
+		struct sockaddr_in _address_local, _address_external;
+		bool _InitHandshake = false;
 
 		/**
 		 * Transfer sizes
 		 */
-		int16_t bufferSize = DEFAULT_BUFFSIZE;
-		int16_t packetSize = PACKETSIZE;
+		int16_t _bufferSize = DEFAULT_BUFFSIZE;
+		int16_t _packetSize = PACKETSIZE;
 	};
 	#endif
 }

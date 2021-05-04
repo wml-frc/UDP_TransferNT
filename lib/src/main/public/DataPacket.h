@@ -41,7 +41,7 @@ namespace UDP_TransferNT {
 		void setCharacters(int index, char value) { dp.characters[index] = (char16_t)value; }
 		void setIntegers(int index, int value) { dp.integers[index] = (int16_t)value; }
 		void setBooleans(int index, bool value) { dp.booleans[index] = (int8_t)value; }
-		void setDecimals(int index, float value) { dp.decimals[index] = (_Float64)value; }
+		void setDecimals(int index, float value) { dp.decimals[index] = (float)value; }
 
 		/**
 		 * Getters

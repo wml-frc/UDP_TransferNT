@@ -20,9 +20,7 @@ Map<String, Object> vendorJson() {
 				headerClassifier: "headers",
 				sharedLibrary: true,
 				skipInvalidPlatforms: true,
-				binaryPlatforms: [
-					"linuxx86-64"
-				]
+				binaryPlatforms: []
 			]
 		]
 	]
@@ -48,9 +46,7 @@ Map<String, Object> vendorJsonLatest() {
 				headerClassifier: "headers",
 				sharedLibrary: true,
 				skipInvalidPlatforms: true,
-				binaryPlatforms: [
-					"linuxx86-64"
-				]
+				binaryPlatforms: []
 			]
 		]
 	]

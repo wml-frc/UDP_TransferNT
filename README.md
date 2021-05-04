@@ -6,20 +6,24 @@
 [![Build Status](https://dev.azure.com/ConnorBuchel0890/WML/_apis/build/status/wml-frc.UDP_TransferNT?branchName=refs%2Fpull%2F5%2Fmerge)](https://dev.azure.com/ConnorBuchel0890/WML/_build/latest?definitionId=16&branchName=refs%2Fpull%2F5%2Fmerge)
 
 #### Adding the lib as vendordep
-- For FRC teams this library is stored in a maven repository, which can be added to vendordeps. Check https://docs.wpilib.org/en/stable/docs/software/vscode-overview/3rd-party-libraries.html on how to add the vendordep. Using this link -> `https://temp.json`
+- For FRC teams this library is stored in a maven repository, which can be added to vendordeps. Check https://docs.wpilib.org/en/stable/docs/software/vscode-overview/3rd-party-libraries.html on how to add the vendordep. 
+
+- Use this link for the latest version -> https://panel.repsy.io/mvn/wml-frc/udp_transfernt/gradle/cpp/UDP_TransferNT-Deps/latest/UDP_TransferNT-Deps-latest.json
+
+- If you want a specific verision you can use this link -> https://panel.repsy.io/mvn/wml-frc/udp_transfernt/gradle/cpp/UDP_TransferNT-Deps/VERSION/UDP_TransferNT-Deps-VERSION.json replacing `VERSION` with desired version e.g `2021.1.1`
 
 #### Adding the lib as submodule dependency
 - If you're wanting to use a specific branch, or for developers who want to contribute. You can add the project as a submodule, and include it as a dependency. See https://docs.gradle.org/current/userguide/declaring_dependencies.html for details on the library dependency.
 
-- 1. use `git submodule add https://github.com/wml-frc/UDP_TransferNT.git ./SUB_LOCATION`
-- 2. Include in root project
+1. use `git submodule add https://github.com/wml-frc/UDP_TransferNT.git ./SUB_LOCATION`
+2. Include in root project
 
 settings.gradle
 ```grale
 include ':UDP_TransferNT'
 ```
 
-- 3. Add dependency to project
+3. Add dependency to project
 
 e.g
 ```gradle

@@ -23,10 +23,19 @@ allprojects {
 	publishing {
 		repositories {
 			maven {
-				url = mavenUrl
-				credentials {
-					username = user
-					password = pass
+				if (localMaven) {
+					println "Using Local Maven"
+					name = "wml_udp_transfernt_maven"
+					url = "${buildDir}/maven"
+				} else {
+					println "Using Remote maven - I sure hope you know what your doing"
+					println System.getenv("WML_USERNAME")
+					println System.getenv("WML_TOKEN")
+					url = mavenUrl
+					credentials {
+						username = project.findProperty("gpr.user") ?: System.getenv("WML_USERNAME")
+						password = project.findProperty("gpr.key") ?: System.getenv("WML_TOKEN")
+					}
 				}
 			}
 

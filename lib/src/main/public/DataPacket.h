@@ -30,7 +30,7 @@ namespace UDP_TransferNT {
 			char16_t characters[DEFAULT_BUFFSIZE]{0};
 			int16_t integers[DEFAULT_BUFFSIZE]{0};
 			int8_t booleans[DEFAULT_BUFFSIZE]{0};
-			_Float64 decimals[DEFAULT_BUFFSIZE]{0};
+			float decimals[DEFAULT_BUFFSIZE]{0};
 		};
 
 		DP dp;

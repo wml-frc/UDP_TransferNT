@@ -94,44 +94,44 @@ namespace UDP_TransferNT {
 	/**
 	 * @TODO: Make threaded network (Time and a half f)
 	 */
-	void Network::update() {
-		switch(_state) {
-			case State::IDLE:
-				setState_t(ThreadState::IDLE); // Will continue to loop, but will not send or receive using socket values
-				break;
+	// void Network::update() {
+	// 	switch(_state) {
+	// 		case State::IDLE:
+	// 			setState_t(ThreadState::IDLE); // Will continue to loop, but will not send or receive using socket values
+	// 			break;
 
-			case State::CONNECTING:
-				setState_t(ThreadState::IDLE);
-				break;
+	// 		case State::CONNECTING:
+	// 			setState_t(ThreadState::IDLE);
+	// 			break;
 			
-			case State::CONNECTED:
-				setState_t(ThreadState::RUNNING); // Run thread loops
-				break;
+	// 		case State::CONNECTED:
+	// 			setState_t(ThreadState::RUNNING); // Run thread loops
+	// 			break;
 
-			case State::DEAD:
-				// Stop all processes in order
-				setState_t(ThreadState::STOP);
+	// 		case State::DEAD:
+	// 			// Stop all processes in order
+	// 			setState_t(ThreadState::STOP);
 
-				// Join threads before purging values
-				if (send_t.joinable()) {
-					send_t.join();
-				}
+	// 			// Join threads before purging values
+	// 			if (send_t.joinable()) {
+	// 				send_t.join();
+	// 			}
 
-				if (rec_t.joinable()) {
-					rec_t.join();
-				}
+	// 			if (rec_t.joinable()) {
+	// 				rec_t.join();
+	// 			}
 
-				// Purge
-				close(_socketValues.getSocket());
-				_socketValues.getSocket() = 0;
-				memset((char *)&_socketValues.getLocalAddress(), 0, sizeof(_socketValues.getLocalAddress()));
-				break;
+	// 			// Purge
+	// 			close(_socketValues.getSocket());
+	// 			_socketValues.getSocket() = 0;
+	// 			memset((char *)&_socketValues.getLocalAddress(), 0, sizeof(_socketValues.getLocalAddress()));
+	// 			break;
 			
-			default:
-				setState(State::IDLE);
-				break;
-		}
-	}
+	// 		default:
+	// 			setState(State::IDLE);
+	// 			break;
+	// 	}
+	// }
 
 	#endif
 }

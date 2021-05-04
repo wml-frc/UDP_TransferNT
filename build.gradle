@@ -2,6 +2,8 @@ plugins {
 	// Apply the cpp-library plugin to add support for building C++ libraries
 	id 'cpp-library'
 
+	id 'cpp'
+
 	// Apply the cpp-unit-test plugin to add support for building and running C++ test executables
 	id 'cpp-unit-test'
 
@@ -23,10 +25,17 @@ allprojects {
 	publishing {
 		repositories {
 			maven {
-				url = mavenUrl
-				credentials {
-					username = user
-					password = pass
+				if (localMaven) {
+					println "Using Local Maven"
+					name = "wml_udp_transfernt_maven"
+					url = "${buildDir}/maven"
+				} else {
+					println "Using Remote maven - I sure hope you know what your doing"
+					url = mavenUrl
+					credentials {
+						username = project.findProperty("gpr.user") ?: System.getenv("WML_USERNAME")
+						password = project.findProperty("gpr.key") ?: System.getenv("WML_TOKEN")
+					}
 				}
 			}
 
@@ -41,9 +50,9 @@ library {
 	linkage = [Linkage.SHARED, Linkage.STATIC]
 
 	targetMachines = [
-		machines.linux.x86_64
-		// machines.windows.x86, machines.windows.x86_64,
-		// machines.macOS.x86_64
+		machines.linux.x86_64,
+		machines.windows.x86, machines.windows.x86_64,
+		machines.macOS.x86_64
 	]
 
 	source {
@@ -62,27 +71,35 @@ library {
 	baseName = "UDP_TransferNT"
 }
 
-unitTest {
+// unitTest {
 
-	targetMachines = [
-		machines.linux.x86_64
-		// machines.windows.x86, machines.windows.x86_64,
-		// machines.macOS.x86_64
-	]
+// 	targetMachines = [
+// 		machines.linux.x86_64
+// 		// machines.windows.x86, machines.windows.x86_64,
+// 		// machines.macOS.x86_64
+// 	]
 
-	source {
-		def cppTree = project.fileTree('lib/src/test/cpp')
-		cppTree.include "**/*.c"
-		cppTree.include "**/*.cc"
-		cppTree.include "**/*.cpp"
+// 	source {
+// 		def cppTree = project.fileTree('lib/src/test/cpp')
+// 		cppTree.include "**/*.c"
+// 		cppTree.include "**/*.cc"
+// 		cppTree.include "**/*.cpp"
 
-		from cppTree
-	}
-}
+// 		from cppTree
+// 	}
+// }
 
 tasks.withType(LinkExecutable).configureEach {
 	linkerArgs.add '-pthread'
 }
 
+tasks.withType(CppCompile).configureEach {
+	compilerArgs.add '-pedantic'
+	compilerArgs.add '-Wall'
+	compilerArgs.add '-Wextra'
+	compilerArgs.add '-Wshadow'
+	compilerArgs.add '-Wreorder'
+}
+
 // Library publishing
-apply from: "${rootDir}/publish.gradle"
+apply from: "publish.gradle"

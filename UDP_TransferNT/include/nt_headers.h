@@ -4,9 +4,13 @@
 #include "nt_platform.h"
 #include <string>
 
-// override if you have a proper logger. E.g spdlog
-#ifndef DEFAULT_NT_LOGGER
-#define DEFAULT_NT_LOGGER(x) std::cout << x << std::endl
+#ifdef DISABLE_NT_LOGGER
+	#define DEFAULT_NT_LOGGER(x)
+#else
+	// override if you have a proper logger. E.g spdlog
+	#ifndef DEFAULT_NT_LOGGER
+	#define DEFAULT_NT_LOGGER(x) std::cout << x << std::endl
+	#endif
 #endif
 
 #ifndef DEFAULT_NT_IP
@@ -22,7 +26,7 @@
 #endif
 
 #ifndef DEFAULT_BUFFER_SIZE
-#define DEFAULT_BUFFER_SIZE 256 // must devisable by typeblock size
+#define DEFAULT_BUFFER_SIZE 256 // must be devisable by typeblock size
 #endif
 
 #define DATAPACKET_TYPESIZE DEFAULT_BUFFER_SIZE/DEFAULT_N_TYPEBLOCK
@@ -31,8 +35,8 @@
 #ifdef NT_UDP_PLATFORM_WINDOWS
 	#include <stdio.h>
 	#include <WinSock2.h>
-	#pragma comment(lib,"ws2_32.lib") //Winsock Library
-
+	#include <WS2tcpip.h>
+	#pragma comment(lib,"Ws2_32.lib") //Winsock Library
 // headers for linux/macos socket
 #elif defined(NT_UDP_PLATFORM_UNIX)
 

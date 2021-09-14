@@ -10,10 +10,10 @@ namespace UDP_TransferNT {
 	struct DataPacket {
 
 		struct DP_USER {
-			char characters[DEFAULT_BUFFER_SIZE]{0};
-			int integers[DEFAULT_BUFFER_SIZE]{0};
-			bool booleans[DEFAULT_BUFFER_SIZE]{0};
-			float decimals[DEFAULT_BUFFER_SIZE]{0};
+			char characters[(DATAPACKET_TYPESIZE)/sizeof(char)]{0};
+			int integers[(DATAPACKET_TYPESIZE)/sizeof(int)]{0};
+			bool booleans[(DATAPACKET_TYPESIZE)/sizeof(bool)]{0};
+			float decimals[(DATAPACKET_TYPESIZE)/sizeof(float)]{0};
 		};
 
 		// DP_RAW dp_r;
@@ -35,6 +35,8 @@ namespace UDP_TransferNT {
 		bool getBooleans(int index) { return (bool)dp.booleans[index]; }
 		float getDecimals(int index) { return (float)dp.decimals[index]; }
 	};
+
+	#define PACKETSIZE sizeof(DataPacket::DP_USER::characters) + sizeof(DataPacket::DP_USER::integers) + sizeof(DataPacket::DP_USER::booleans) + sizeof(DataPacket::DP_USER::booleans)  
 }
 
 #endif // DATAPACKET_H

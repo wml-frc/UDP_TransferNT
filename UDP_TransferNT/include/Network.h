@@ -46,7 +46,7 @@ namespace UDP_TransferNT {
 		/**
 		 * Main network, initialize as either server or client
 		 */
-		Network(Type type, ConnectionType connType, int port = DEFAULT_NT_PORT, const char *ip = DEFAULT_NT_IP, int bufferSize = DEFAULT_BUFFER_SIZE) : _type(type), _connType(connType),  _bufferSize(bufferSize) {
+		Network(Type type, ConnectionType connType, int port = DEFAULT_NT_PORT, const char *ip = DEFAULT_NT_IP, int bufferSize = DEFAULT_BUFFER_SIZE) : _type(type), _connType(connType) {
 			// Set the socket vals
 			_socket.setPort(port);
 			_socket.setIP(ip);
@@ -57,11 +57,16 @@ namespace UDP_TransferNT {
 			DEFAULT_NT_LOGGER("Connection Type: " + std::to_string((int)_connType));
 			DEFAULT_NT_LOGGER("Port: " + std::to_string(_socket.getPort()));
 			DEFAULT_NT_LOGGER(_socket.getIP());
-			DEFAULT_NT_LOGGER("Buffer Size: " + std::to_string(_bufferSize));
+			DEFAULT_NT_LOGGER("Buffer Size: " + std::to_string(DEFAULT_BUFFER_SIZE));
+			DEFAULT_NT_LOGGER("Packet size: " + std::to_string(PACKETSIZE));
 		}
 
 		~Network() {
 			_socket.close();
+		}
+
+		Socket &getSocket() {
+			return _socket;
 		}
 
 		void init() {
@@ -113,6 +118,16 @@ namespace UDP_TransferNT {
 						break; // CLIENT END
 				}
 
+				#ifdef NT_UDP_PLATFORM_WINDOWS
+					DWORD timeout = _socket.getRecvTimeout();
+					setsockopt(_socket.getSocket(), SOL_SOCKET, SO_RCVTIMEO, (const char *)&timeout, sizeof(timeout));
+				#elif defined(NT_UDP_PLATFORM_UNIX)
+					struct timeval tv;
+					tv.tv_sec = 0;
+					tv.tv_usec = _socket.getRecvTimeout() * 1000;
+					setsockopt(_socket.getSocket(), SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof(tv));
+				#endif
+
 				if (programValue == 0) {
 					_connStat = ConnectionStatus::CONNECTED;
 					_state = State::IDLE;
@@ -137,19 +152,19 @@ namespace UDP_TransferNT {
 		 * Raw send
 		 * Send a buffer with max size of the bufferSize
 		 */
-		int raw_send(char *buffer) {
+		int raw_send(const char buffer[DEFAULT_BUFFER_SIZE]) {
 			int programValue = 0;
 			if (_connStat == ConnectionStatus::CONNECTED) {
 				_state = State::RUNNING;
 				switch (_type) {
 					case Type::SERVER:
 						#ifdef NT_UDP_PLATFORM_WINDOWS
-						if (sendto(_socket.getSocket(), buffer, _bufferSize, 0, (struct sockaddr *)&_socket.getOtherAddress(), _socket.getOtherAddressLength()) == SOCKET_ERROR) {
-							DEFAULT_NT_LOGGER("Server Send error windows");
+						if (sendto(_socket.getSocket(), buffer, DEFAULT_BUFFER_SIZE, 0, (struct sockaddr *)&_socket.getOtherAddress(), *_socket.getOtherAddressLength()) == SOCKET_ERROR) {
+							DEFAULT_NT_LOGGER("Server Send error windows: " + std::to_string(WSAGetLastError()));
 							programValue = 1;
 						}
 						#elif defined(NT_UPD_PLATFORM_UNIX)
-						if (sendto(_socket.getSocket(), buffer, _bufferSize, 0, (struct sockaddr *)&_socket.getOtherAddress(), _socket.getOtherAddressLength()) < 0) {
+						if (sendto(_socket.getSocket(), buffer, DEFAULT_BUFFER_SIZE, 0, (struct sockaddr *)&_socket.getOtherAddress(), *_socket.getOtherAddressLength()) < 0) {
 							DEFAULT_NT_LOGGER("Server Send error unix");
 							programValue = 1;
 						}
@@ -158,12 +173,12 @@ namespace UDP_TransferNT {
 
 					case Type::CLIENT:
 						#ifdef NT_UDP_PLATFORM_WINDOWS
-						if (sendto(_socket.getSocket(), buffer, _bufferSize, 0, (struct sockaddr *)&_socket.getOtherAddress(), _socket.getOtherAddressLength()) == SOCKET_ERROR) {
-							DEFAULT_NT_LOGGER("Client Send error windows");
+						if (sendto(_socket.getSocket(), buffer, DEFAULT_BUFFER_SIZE, 0, (struct sockaddr *)&_socket.getOtherAddress(), *_socket.getOtherAddressLength()) == SOCKET_ERROR) {
+							DEFAULT_NT_LOGGER("Client Send error windows: " + std::to_string(WSAGetLastError()));
 							programValue = 1;
 						}
 						#elif defined(NT_UPD_PLATFORM_UNIX)
-						if (sendto(_socket.getSocket(), buffer, _bufferSize, 0, (struct sockaddr *)&_socket.getOtherAddress(), _socket.getOtherAddressLength()) < 0) {
+						if (sendto(_socket.getSocket(), buffer, DEFAULT_BUFFER_SIZE, 0, (struct sockaddr *)&_socket.getOtherAddress(), *_socket.getOtherAddressLength()) < 0) {
 							DEFAULT_NT_LOGGER("Client Send error unix");
 							programValue = 1;
 						}
@@ -181,20 +196,21 @@ namespace UDP_TransferNT {
 		 * Raw receive
 		 * receive a raw buffer with a max buffersize
 		 */
-		std::pair<char *, int> raw_recv() {
+		int raw_recv(char *buffer) {
 			int programValue = 0;
-			char *buffer = {0};
+			memset(buffer, 0, DEFAULT_BUFFER_SIZE);
 			if (_connStat == ConnectionStatus::CONNECTED) {
 				_state = State::RUNNING;
 				switch (_type) {
 					case Type::SERVER:
 						#ifdef NT_UDP_PLATFORM_WINDOWS
-						if (recvfrom(_socket.getSocket(), buffer, _bufferSize, 0, (struct sockaddr *)&_socket.getOtherAddress(), &_socket.getOtherAddressLength()) == SOCKET_ERROR) {
-							DEFAULT_NT_LOGGER("Server Recv error windows");
+						if (recvfrom(_socket.getSocket(), buffer, DEFAULT_BUFFER_SIZE, 0, (struct sockaddr *)&_socket.getOtherAddress(), _socket.getOtherAddressLength()) == SOCKET_ERROR) {
+							DEFAULT_NT_LOGGER("Server Recv error windows: " + std::to_string(WSAGetLastError()));
 							programValue = 1;
 						}
+
 						#elif defined(NT_UDP_PLATFORM_UNIX)
-						if (recvfrom(_socket.getSocket(), buffer, _bufferSize, 0, (struct sockaddr *)&_socket.getOtherAddress(), &_socket.getOtherAddressLength()) < 0) {
+						if (recvfrom(_socket.getSocket(), buffer, DEFAULT_BUFFER_SIZE, 0, (struct sockaddr *)&_socket.getOtherAddress(), _socket.getOtherAddressLength()) < 0) {
 							DEFAULT_NT_LOGGER("Server Recv error unix");
 							programValue = 1;
 						}
@@ -203,12 +219,12 @@ namespace UDP_TransferNT {
 
 					case Type::CLIENT:
 						#ifdef NT_UDP_PLATFORM_WINDOWS
-						if (recvfrom(_socket.getSocket(), buffer, _bufferSize, 0, (struct sockaddr *)&_socket.getOtherAddress(), &_socket.getOtherAddressLength()) == SOCKET_ERROR) {
-							DEFAULT_NT_LOGGER("Client Recv error windows");
+						if (recvfrom(_socket.getSocket(), buffer, DEFAULT_BUFFER_SIZE, 0, (struct sockaddr *)&_socket.getOtherAddress(), _socket.getOtherAddressLength()) == SOCKET_ERROR) {
+							DEFAULT_NT_LOGGER("Client Recv error windows: " + std::to_string(WSAGetLastError()));
 							programValue = 1;
 						}
 						#elif defined(NT_UDP_PLATFORM_UNIX)
-						if (recvfrom(_socket.getSocket(), buffer, _bufferSize, MSG_DONTWAIT, (struct sockaddr *)&_socket.getOtherAddress(), &_socket.getOtherAddressLength()) < 0) {
+						if (recvfrom(_socket.getSocket(), buffer, DEFAULT_BUFFER_SIZE, MSG_DONTWAIT, (struct sockaddr *)&_socket.getOtherAddress(), _socket.getOtherAddressLength()) < 0) {
 							DEFAULT_NT_LOGGER("Client Recv error unix");
 							programValue = 1;
 						}
@@ -219,16 +235,18 @@ namespace UDP_TransferNT {
 			} else {
 				programValue = 1;
 			}
-			return {buffer, programValue};
+
+			return programValue;
 		}
 
 		/**
 		 * Send over a serialized datapacket
 		 */
-		void dpSend(DataPacket dp) {
+		void dpSend(DataPacket &dp) {
 			if (_connStat == ConnectionStatus::CONNECTED) {
-				char *buffer;
-				serialize(dp, buffer);
+				DataPacket dpBuff = dp;
+				char buffer[DEFAULT_BUFFER_SIZE];
+				serialize(dpBuff, buffer);
 				raw_send(buffer);
 			}
 		}
@@ -239,12 +257,12 @@ namespace UDP_TransferNT {
 		 * (Stops random zeroed out datapacket from being returned if no datapacket is received)
 		 */
 		DataPacket dpRecv(DataPacket dpPrevious = {0}) {
-			DataPacket dpBuffer;
-			std::pair<char *, int> recvBuffer;
 			if (_connStat == ConnectionStatus::CONNECTED) {
-				recvBuffer = raw_recv();
-				if (recvBuffer.second == 0) {
-					deserialize(dpBuffer, recvBuffer.first);
+				DataPacket dpBuffer;
+				char *recvBuffer = (char *)malloc(DEFAULT_BUFFER_SIZE * sizeof(char));
+				if (raw_recv(recvBuffer) == 0) {
+					deserialize(dpBuffer, recvBuffer);
+					free(recvBuffer);
 					return dpBuffer;
 				}
 			}
@@ -255,7 +273,6 @@ namespace UDP_TransferNT {
 	 private:
 		Type _type;
 		ConnectionType _connType{ ConnectionType::ANY };
-		const int _bufferSize;
 
 		// Socket
 		Socket _socket;

@@ -2,6 +2,7 @@
 #define NT_HEADERS_H
 
 #include "nt_platform.h"
+#include <string>
 
 // override if you have a proper logger. E.g spdlog
 #ifndef DEFAULT_NT_LOGGER
@@ -29,7 +30,7 @@
 	#pragma comment(lib,"ws2_32.lib") //Winsock Library
 
 // headers for linux/macos socket
-#elif defined(NT_UDP_PLATFORM_LINUX) || defined(NT_UDP_PLATFORM_MACOS)
+#elif defined(NT_UDP_PLATFORM_UNIX)
 
 
 #endif // nt platform

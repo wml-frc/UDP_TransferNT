@@ -11,12 +11,14 @@
 
 using namespace UDP_TransferNT;
 
+int cycleCount = 20;
+
 void server() {
-	Network s_network(Network::Type::SERVER, Network::ConnectionType::ANY);
+	Network s_network(Network::Type::SERVER, Network::ConnectionType::IP_SPECIFIC);
 	s_network.init();
 
 	DataPacket dpRecv;
-	while (true) {
+	for (int i = 0; i < cycleCount; i++) {
 		dpRecv = s_network.dpRecv(dpRecv);
 		std::cout << "DP Recv: " << dpRecv.getDecimals(0) << std::endl;
 		Sleep(1000);
@@ -24,14 +26,15 @@ void server() {
 }
 
 void client() {
-	Network c_network(Network::Type::CLIENT, Network::ConnectionType::ANY);
+	Network c_network(Network::Type::CLIENT, Network::ConnectionType::IP_SPECIFIC);
 	c_network.init();
 
 	DataPacket dpSend;
 
-	while (true) {
+	for (int i = 0; i < cycleCount; i++) {
 		dpSend.setDecimals(0, 0.5);
 		c_network.dpSend(dpSend);
+		// c_network.raw_send("hello from client");
 		Sleep(1000);
 	}
 }
@@ -39,6 +42,8 @@ void client() {
 int main() {
 	std::cout << "Test Run..." << std::endl;
 
+	// server();
+	// client();
 
 	std::thread server_t(server);
 	std::thread client_t(client);
@@ -46,6 +51,7 @@ int main() {
 	server_t.join();
 	client_t.join();
 
+	system("pause");
 
 	return 0;
 }

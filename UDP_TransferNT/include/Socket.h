@@ -92,10 +92,10 @@ namespace UDP_TransferNT {
 		void prepSocketStructure(bool client = false, bool ipSpecific = false) {
 
 			// zero out addresses
-			memset((char *)&_si_local, 0, sizeof(_si_local));
-			memset((char *)&_si_other, 0, sizeof(_si_other));
+			// memset((char *)&_si_local, 0, sizeof(_si_local));
 
 			if (client) {
+				memset((char *)&_si_other, 0, sizeof(_si_other));
 				_si_other.sin_family = AF_INET;
 				_si_other.sin_port = htons(_port);
 				if (ipSpecific) {

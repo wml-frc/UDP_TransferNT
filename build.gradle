@@ -51,7 +51,7 @@ task run {
 		exec {
 			workingDir "build/exe/udp_transferNT"
 			if (isFamily(FAMILY_WINDOWS)) {
-				commandLine "cmd", "/c", "udp_transferNT.exe"
+				commandLine "cmd", "/c", "start", "udp_transferNT.exe"
 			} else if (isFamily(FAMILY_UNIX)) {
 				commandLine "./udp_transferNT"
 			} else {

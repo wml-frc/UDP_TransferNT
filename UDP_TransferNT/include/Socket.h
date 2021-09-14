@@ -26,13 +26,33 @@ namespace UDP_TransferNT {
 			return _ip;
 		}
 
-		struct sockaddr_in &getLocalSocket() {
+		struct sockaddr_in &getLocalAddress() {
 			return _si_local;
 		}
 
-		struct sockaddr_in &getOtherSocket() {
+		int &getLocalAddressLength() {
+			_si_local_len = sizeof(_si_local);
+			return _si_local_len;
+		}
+
+		struct sockaddr_in &getOtherAddress() {
 			return _si_other;
 		}
+
+		int &getOtherAddressLength() {
+			_si_other_len = sizeof(_si_other);
+			return _si_other_len;
+		}
+
+		#ifdef NT_UDP_PLATFORM_WINDOWS
+		SOCKET &getSocket() {
+			return _socket;
+		}
+		#elif defined(NT_UDP_PLATFORM_UNIX)
+		int &getSocket() {
+			return _socket;
+		}
+		#endif
 
 		int createSocket(bool client = false) {
 
@@ -135,8 +155,7 @@ namespace UDP_TransferNT {
 		const char *_ip;
 
 		struct sockaddr_in _si_local, _si_other; // Server uses both socket addresses. Client uses si_other
-		int _send_len, _recv_len;
-		char BUFFER[DEFAULT_BUFFER_SIZE];
+		int _si_local_len, _si_other_len;
 
 		#ifdef NT_UDP_PLATFORM_WINDOWS // windows
 		SOCKET _socket;

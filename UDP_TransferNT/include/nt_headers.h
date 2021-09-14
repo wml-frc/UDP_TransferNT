@@ -9,6 +9,10 @@
 #define DEFAULT_NT_LOGGER(x) std::cout << x << std::endl
 #endif
 
+#ifndef DEFAULT_NT_IP
+#define DEFAULT_NT_IP "127.0.0.1" // local ip address
+#endif
+
 #ifndef DEFAULT_NT_PORT
 #define DEFAULT_NT_PORT 5801 // official allowed frc ports are 5800 to 5810
 #endif

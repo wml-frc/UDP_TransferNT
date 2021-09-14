@@ -56,6 +56,7 @@ namespace UDP_TransferNT {
 
 		void init() {
 			while (_connStat != ConnectionStatus::CONNECTED) {
+				int programValue = 0;
 				if (_connStat == ConnectionStatus::CONNECTING) {
 					DEFAULT_NT_LOGGER("Closing Socket, reconnecting...");
 					_socket.close();
@@ -65,17 +66,45 @@ namespace UDP_TransferNT {
 
 				DEFAULT_NT_LOGGER("Opening socket...");
 
-				if (_socket.createSocket() != 0) {
-					DEFAULT_NT_LOGGER("Error opening socket");
-				}
+				switch (_type) {
+					case Type::SERVER: // SERVER
+						if (programValue + _socket.createSocket() != 0) {
+							DEFAULT_NT_LOGGER("Error opening socket");
+						}
 
-				_socket.prepSocketStructure();
+						if (_connType == ConnectionType::ANY) {
+							_socket.prepSocketStructure();
+						} else if (_connType == ConnectionType::IP_SPECIFIC) {
+							_socket.prepSocketStructure(false, true);
+						}
+
+						if (programValue + _socket.bindSocket() != 0) {
+							DEFAULT_NT_LOGGER("Error binding socket");
+						}
+						break; // SERVER END
+
+					case Type::CLIENT: // CLIENT
+						if (programValue + _socket.createSocket(true) != 0) {
+							DEFAULT_NT_LOGGER("Error opening socket");
+						}
+
+						if (_connType == ConnectionType::ANY) {
+							_socket.prepSocketStructure(true);
+						} else if (_connType == ConnectionType::IP_SPECIFIC) {
+							_socket.prepSocketStructure(true, true);
+						}
+
+						break; // CLIENT END
+				}
 			}
 		}
 
-		int checkConn(bool forceReconn = false) {
 
-		}
+		void raw_send() {}
+		void raw_recv() {}
+
+		void dpSend() {}
+		void dpRecv() {}
 
 	 private:
 		Type _type;

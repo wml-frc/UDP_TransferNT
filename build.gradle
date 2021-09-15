@@ -30,7 +30,7 @@ model {
 
 [FAMILY_WINDOWS, FAMILY_UNIX, FAMILY_MAC].each { osName ->
 	// Create Task
-	if (!project.tasks.findByName("$osName")) {		
+	if (!project.tasks.findByName("$osName")) {
 		tasks.create(osName) {
 			description "OS is ${osName}"
 			

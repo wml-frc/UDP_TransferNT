@@ -1,243 +1,468 @@
 # UDP Transfer Network
 
-### Built for fast paced data streams between two or more devices
+## Fast paced point to point network connection
 
-#### Build Status
-[![Build Status](https://dev.azure.com/ConnorBuchel0890/WML/_apis/build/status/wml-frc.UDP_TransferNT?branchName=refs%2Fpull%2F5%2Fmerge)](https://dev.azure.com/ConnorBuchel0890/WML/_build/latest?definitionId=16&branchName=refs%2Fpull%2F5%2Fmerge)
+### Project Overview
+- UDP (User Datagram Protocol) does not require the need for handshaking between a server and client. Due to this it is faster than other network transfer protocols like TCP. This network library is a small but usefull wrapper around both winsock2 and the standard unix socket for C programs written in C++. Providing methods for creating both Servers and Clients with the option of either allowing ANY connection or IP_SPECIFIC connections for point to point transfer.
 
-#### Adding the lib as vendordep
-- For FRC teams this library is stored in a maven repository, which can be added to vendordeps. Check https://docs.wpilib.org/en/stable/docs/software/vscode-overview/3rd-party-libraries.html on how to add the vendordep. 
+- Sending and Receiving can be done either using the raw send receive function with a byte array, or by using the built in datapackets which are serialized and deserialized using the the Serializer. The project has a default buffersize of `256` bytes which can be overrided. 
 
-- Use this link for the latest version -> https://panel.repsy.io/mvn/wml-frc/udp_transfernt/gradle/cpp/UDP_TransferNT-Deps/latest/UDP_TransferNT-Deps-latest.json
+- Datapackets are sent using a serializing method of 4 byte arrays that fit into the buffer. Characters, Integers, Booleans and Decimals. The byte arrays have their own segmented block inside the main byte array which is sent and received. These segments (TYPEBLOCKS) vary in size but have an even amount of bytes alocated to them. I.e. A buffersize of `256 bytes` has segmented blocks that looks like this `|64|64|64|64|`. Each block has `64 bytes` allocated to it. But could also be represented as `|Characters|Integers|Booleans|Decimals|`. Where each segmented block is a data type array of either characters, integers, booleans or decimals. You can see the method of serializing and deserializing in the file [Serializer.h](UDP_TransferNT/include/Serializer.h).
 
-- If you want a specific verision you can use this link -> https://panel.repsy.io/mvn/wml-frc/udp_transfernt/gradle/cpp/UDP_TransferNT-Deps/VERSION/UDP_TransferNT-Deps-VERSION.json replacing `VERSION` with desired version e.g `2021.1.1`
+- Each segment block varies in how many values it can hold. Because the buffersize can change depending on what the user defines it as. I.e if the buffersize is 256, each block size is 64 bytes. Then you could hold `64 characters`, `16 integers`, `64 booleans` and `16 decimals` (which are stored as floats). The array of data is specified as `dataType DataArray[BLOCK_SIZE/sizeof(dataType)]`.
 
-#### Adding the lib as submodule dependency
-- If you're wanting to use a specific branch, or for developers who want to contribute. You can add the project as a submodule, and include it as a dependency. See https://docs.gradle.org/current/userguide/declaring_dependencies.html for details on the library dependency.
+### Installation
+- The project is built as a header library and just needs the `include` dir linked with the build of your main project
 
-1. use `git submodule add https://github.com/wml-frc/UDP_TransferNT.git ./SUB_LOCATION`
-2. Include in root project
+- To install, you can either download the project and place the `include` directory in your project. Or clone the project and use it as a submodule, which you can then link the `include` directory via your build method.
 
-settings.gradle
-```grale
-include ':UDP_TransferNT'
-```
-
-3. Add dependency to project
-
-e.g
+#### FRC Install
+- For FRC Teams the project can be linked simply through `build.gradle`. To do this, append your build.gradle to include the location of the `include` directory. This will link the header files and build them when you run `./gradlew build`. 
 ```gradle
-dependencies {
-	implementation project(':UDP_TransferNT')
-}
-```
-
-- or as a proper static/shared library in the binaries
-```gradle
-model {
-	components {
-		frcUserProgram(NativeExecutableSpec) {
-			...
-
-			binaries.all {
-				// Or option one (more controlled for use case)
-				lib project: ':UDP_TransferNT', library: 'UDP_TransferNT', linkage: 'shared' // Can also be static
-
-				// Option two (May not work in certain applications)
-				lib library: 'UDP_TransferNT'
+sources.cpp {
+		source {
+			srcDir 'src/main/cpp'
+			include '**/*.cpp', '**/*.cc'
+		}
+		exportedHeaders {
+			srcDirs ["src/main/include", "<UDP_TRASNFERNT_LOCATION>/UDP_TransferNT/include"]
+			if (includeSrcInIncludeRoot) {
+					srcDir 'src/main/cpp'
 			}
 		}
 	}
-}
 ```
 
-
-#### Manual addition.
-However, if none of the above options work you can link the cpp and public folders using another means if you wish to use it without gradle. (All cpp is written using linux std libraries, in a linux environment) So there are no special requirements.
-
-### Usage
-
-- UDP transfer does not require a handshake between two devices, it will send the data to a port without regard, and anything listening on that port will receive data. This transfer system, is best used when the client tries to send the data to the servers IP. especially for programs like FRC where the data can be affected by other traffic.
-
-- In cpp, include the UDP_TransferNT.h file and create either a server or a client. The process for sending data should be as simple as initializing either a server or client, creating a datapacket and then sending/receiving that datapacket.
+- Note, that if you are a team which uses [WML](https://github.com/wml-frc/WML), then this library should already be linked up.
 
 
-#### Basic single threaded send/recv using server & client
 
-##### Config
-- Server is our sender
-- Client is out receiver
+# Example Usage
+
+### Point to Point with datapackets
+
+#### Config
+- Server is our `receiver` | IP_Specific/ANY
+- Client is our `sender` | IP_Specific
 - Port: `5801` <- Default
-- IP: `192.168.178.125` <- default is `127.0.0.1`
-- Buffer size/array sizes: `512` <- default 
+- IP: `10.47.88.2` Default is -> localhost: `127.0.0.1`
+- Buffersize: `256` <- Defaul
+- RecvTimeout: `1000` <- default (ms)
 
-Server
+#### Server (Receiver)
 ```cpp
+#define DEFAULT_BUFFER_SIZE 256 // default if not set
 #include "UDP_TransferNT.h"
 
-UDP_TransferNT::Server server; // Create server
-UDP_TransferNT::DataPacket dpSend; // Our datapacket which we will be sending
+using namespace UDP_TransferNT;
+Network s_network(Network::Type::SERVER, Network::ConnectionType::IP_SPECIFIC);
 
-server.init(); // Create the socket and bind to it (Default port is 5801)
+int main() {
+	s_network.getSocket().setRecvTimeout(1000); // Must be done before network init
+	s_network.init();
 
-/**
- * Set values for datapacket (Each element is has an arraysize (buffersize) of 512, but can be changed)
- */
-dpSend.setBooleans(1, true); // Set boolean index 1 as true
-dpSend.setCharacter(10, 't'); // Set character index 10 as 't'
-dpSend.setDecimals(0, 0.111); // set decimal value (float) index 0 to 0.111
-dpSend.setIntegers(2, 12); // Set integer index 2 to 12
-dpSend.setIntegers(1, 13); // Set integer index 1 to 13
+	DataPacket data;
 
-server.send(dpSend); // Send the data packet
+	while (true) {
+		data = s_network.dpRecv(data); // will stop program and wait until it either gets data. Or times out (see setRecvTimeout(ms))
 
-```
+		std::cout << "DP Recv Character at index 0: " << data.getCharacters(0) << std::endl;
+		std::cout << "DP Recv Integer at index 3: " << data.getIntegers(3) << std::endl;
+		std::cout << "DP Recv Boolean at index 5: " << data.getBooleans(5) << std::endl;
+		std::cout << "DP Recv Decimal at index 0: " << data.getDecimals(0) << std::endl;
 
-Client
-```cpp
-#include "UDP_TransferNT.h"
+		#ifdef NT_UDP_PLATFORM_WINDOWS
+		Sleep(1000);
+		#elif defined(NT_UDP_PLATFORM_UNIX)
+		usleep(1000*1000); // um
+		#endif
+	}
 
-UDP_TransferNT::Client client; // Create client
-UDP_TransferNT::DataPacket dpRecv; // Create the receiving datapacket
-
-/**
- * Change socket values to point to server IP address
- */
-client.getSocket().setIP("192.168.178.125"); // .setPort() is also available to switch port from 5801 to something else (Socket setters, must be accessed before the client is initialized, or the socket will be bound to the wrong place!)
-
-client.init(); // Create the socket and connect to ip address
-
-client.recv(dpRecv); // Listen for datapacket (Will stop program and wait)
-
-/**
- * Output the data to console, remember the indexes you set them to, to get the correct data
- */
-std::cout << dpRecv.getBooleans(1) << std::endl; // Get boolean on index 1 from recv
-std::cout << dpRecv.getCharacter(10) << std::endl;
-std::cout << dpRecv.getDecimals(0) << std::endl;
-std::cout << dpRecv.getIntegers(2) << std::endl;
-std::cout << dpRecv.getIntegers(3) << std::endl;
-```
-
-- The above example, shows how to use the most basic setup. However, it has the issue of waiting until data has been sent before the program can continue. And in programs with a constant data stream between the devices looping these functions can slow the program down. To solve this we can register a datapacket to be sent or received, and it will be put the send/recv functions onto a seperate thread which will loop continously sending or receiving data in the background.
-
-- It should also be mentioned that the client/server init() functions can also hault the program if they're taking too long to connect/bind to a socket. When constructing them, you can set the first parameter to `true`, which will also temporarily put the init function on a seperate thread before joining back into the main thread when it's finished binding/connecting.
-
-- Not only can you register datapackets, but you can control the registered send/recv threads later using the built in thread functions, to pause, continue, or kill the connection outright.
-
-#### Multi-threaded registering/receiving of data
-
-Server
-```cpp
-#include "UDP_TransferNT.h"
-
-UDP_TransferNT::Server server(true); // Create server, (And set threading to true, so it will continue the rest of the program while it's still binding to the socket)
-UDP_TransferNT::DataPacket dpSend; // Our datapacket which we will be sending
-
-server.init(); // Initialize with values
-float value = 0.001; // Our value that we're sending
-dpSend.setDecimals(0, value); // Set index 0 to value
-
-server.registerSend(dpSend); // Start a seperate thread which continuosly sends
-
-while (true) {
-	value += 0.001; // Contantly increase the value every cycle
-	dpSend.setDecimals(0, value); // Set the decimal index
+	return 0;
 }
 ```
 
-Client
+#### Client (Sender)
 ```cpp
+#define DEFAULT_BUFFER_SIZE 256 // default if not set
 #include "UDP_TransferNT.h"
 
-UDP_TransferNT::Client client(true); // Create client
-UDP_TransferNT::DataPacket dpRecv; // Create the receiving datapacket
+using namespace UDP_TransferNT;
+Network c_network(Network::Type::CLIENT, Network::ConnectionType::IP_SPECIFIC);
 
-/**
- * Change socket values to point to server IP address
- */
-client.getSocket().setIP("192.168.178.125"); // .setPort() is also available to switch port from 5801 to something else (Socket setters, must be accessed before the client is initialized, or the socket will be bound to the wrong place!)
+int main() {
+	c_network.getSocket().setIP("10.47.88.2")
+	c_network.getSocket().setPort(5801); // default if not set
+	c_network.init();
 
-client.init();
+	DataPacket data;
+	float decimalValue = 0.1;
+	while (true) {
+		data.setCharacters(0, 'c');
+		data.setIntegers(3, 3);
+		data.setBooleans(5, true);
+		data.setDecimals(0, decimalValue);
 
-client.registerRecv(dpRecv); // Start a thread which constantly receives data and sends it to dpRecv
+		decimalValue += 0.1;
 
-while (true) {
-	std::cout << dpRecv.getDecimals(0) << std::endl; // Output what is being received
+		c_network.dpSend(data); // sends the data (does not stop program)
+
+		#ifdef NT_UDP_PLATFORM_WINDOWS
+		Sleep(1000);
+		#elif defined(NT_UDP_PLATFORM_UNIX)
+		usleep(1000*1000); // um
+		#endif
+	}
+
+	return 0;
 }
 ```
 
-- After registered threads have been launched, you can modify them using the following (This controls all threads associated with the objects sending/receiving threads, not just the registered) WILL HAULT GENERIC SEND/RECV FUNCTIONS
+### Point to Point using raw buffers
+- If the preference of using a raw send receive without a serialized datapacket is more apealing. The raw sender and receivers are available to use. Simillar to the datapackets, they fit inside the the set buffer size. But do not segment the buffer at all. If you plan to use your own method of serializing then this would be preferable. E.g, you could send `256 characters` over the network if you wanted a full string message to be sent.
 
+#### Config
+- Server is our `receiver` | IP_Specific/ANY
+- Client is our `sender` | IP_Specific
+- Port: `5801` <- Default
+- IP: `10.47.88.2` Default is -> localhost: `127.0.0.1`
+- Buffersize: `256` <- Defaul
+- RecvTimeout: `1000` <- default (ms)
+
+#### Server (Receiver)
 ```cpp
-// Can be server or client
-server.stop() // Stop all threads, (Still looping in the background, but not sending or receiving data)
+#define DEFAULT_BUFFER_SIZE 256 // default if not set
+#include "UDP_TransferNT.h"
 
-server.start() // Start threads (Only works if they were previously stopped)
+using namespace UDP_TransferNT;
+Network s_network(Network::Type::SERVER, Network::ConnectionType::IP_SPECIFIC);
 
-server.kill() // Kill the process. Stops the threads, sets the sate of the program and threads to DEAD, purges all values and closes the socket discriptors. (Cannot be started again after this unless you call server.init() again)
+int main() {
+	s_network.getSocket().setRecvTimeout(1000); // Must be done before network init
+	s_network.init();
+
+	char *rawBuffer = (char *)malloc(DEFAULT_BUFFER_SIZE * sizeof(char)); // Malloc a byte array to the size of the buffer
+
+	while (true) {
+		int recvVal = 0;
+		if ((recvVal = s_network.raw_recv(rawBuffer)) != 0) {
+			std::cout << "Receive error: " recvVal << std::endl;
+		} else {
+			std::cout << "Messafe Received: " << rawBuffer << std::endl;
+		}
+
+		#ifdef NT_UDP_PLATFORM_WINDOWS
+		Sleep(1000);
+		#elif defined(NT_UDP_PLATFORM_UNIX)
+		usleep(1000*1000); // um
+		#endif
+	}
+
+	free(rawBuffer); // free the buffer to stop memory leaking
+	return 0;
+}
 ```
 
-- The above examples showcase simple ways to send and receive data. You can have multiple servers and clients running on multiple ports, and you can change the buffersizes to increase speeds (Not by much). Below lists the rest of the functionality you can apply.
+
+#### Client (Sender)
+```cpp
+#define DEFAULT_BUFFER_SIZE 256 // default if not set
+#include "UDP_TransferNT.h"
+
+using namespace UDP_TransferNT;
+Network c_network(Network::Type::CLIENT, Network::ConnectionType::IP_SPECIFIC);
+
+int main() {
+	c_network.getSocket().setIP("10.47.88.2")
+	c_network.getSocket().setPort(5801); // default if not set
+	c_network.init();
+
+	char rawBuffer[DEFAULT_BUFFER_SIZE] = {"Hello from client"}; // create the buffer
+
+	while (true) {
+		int sendVal = 0;
+		if ((sendVal = c_network.raw_send(rawBuffer)) != 0) {
+			std::cout << "Send error: " << sendVal << std::endl;
+		} else {
+			std::cout << "Message sent" << std::endl;
+		}
+
+		#ifdef NT_UDP_PLATFORM_WINDOWS
+		Sleep(1000);
+		#elif defined(NT_UDP_PLATFORM_UNIX)
+		usleep(1000*1000); // um
+		#endif
+	}
+
+	return 0;
+}
+```
+
+
+
+### Notes and Optimisation
+- If this network is being used for fast paced networking between two or more devices you can optimise the project heavily. However there I caution anyone doing it. As this uses raw socket programming compared to other methods (i.e Network Tables). It can easily saturate an entire existing network, as it has no speed limit unless specified to do so. The only limitation, is the hardware this project runs on, and the program that it's being imported into. It's recommened to slow this project down to a have a cycle time of 10ms. As this provides both a decent speed and low network saturation cost.
+
+- That being said. To optimise the project there are two main methods to do so. On the receiving end the project receive timeout can be lowered to a minimum of 1 (Meaning 1 ms). This results in the program instantly skipping the `dpRecv()` or `raw_recv()` functions unless data exists. Because of this, a receive error will often pop up, especially if one device is running faster than the other. 
+
+- This can be resolved by disabling the logger before uncluding the library. This improves speed as the logger requires some logic to output text to the console. However, it will remove error messages too.
+
+- An example of the fastest network possible can be seen below (receiver side. Sender side needs no real change other than removing any function to make the project wait)
+
+#### Server (Receiver)
+```cpp
+#define DEFAULT_BUFFER_SIZE 256 // default if not set
+#define DISABLE_NT_LOGGER
+#include "UDP_TransferNT.h"
+
+using namespace UDP_TransferNT;
+Network s_network(Network::Type::SERVER, Network::ConnectionType::IP_SPECIFIC);
+
+int main() {
+	s_network.getSocket().setRecvTimeout(1); // Must be done before network init
+	s_network.init();
+
+	DataPacket data;
+
+	while (true) {
+		data = s_network.dpRecv(data); // will stop program and wait until it either gets data. Or times out (see setRecvTimeout(ms))
+
+		std::cout << "DP Recv Character at index 0: " << data.getCharacters(0) << std::endl;
+		std::cout << "DP Recv Integer at index 3: " << data.getIntegers(3) << std::endl;
+		std::cout << "DP Recv Boolean at index 5: " << data.getBooleans(5) << std::endl;
+		std::cout << "DP Recv Decimal at index 0: " << data.getDecimals(0) << std::endl;
+	}
+
+	return 0;
+}
+```
+
+#### Client (Sender)
+```cpp
+#define DEFAULT_BUFFER_SIZE 256 // default if not set
+#define DISABLE_NT_LOGGER
+#include "UDP_TransferNT.h"
+
+using namespace UDP_TransferNT;
+Network c_network(Network::Type::CLIENT, Network::ConnectionType::IP_SPECIFIC);
+
+int main() {
+	c_network.getSocket().setIP("10.47.88.2")
+	c_network.getSocket().setPort(5801); // default if not set
+	c_network.init();
+
+	DataPacket data;
+	float decimalValue = 0.1;
+	while (true) {
+		data.setCharacters(0, 'c');
+		data.setIntegers(3, 3);
+		data.setBooleans(5, true);
+		data.setDecimals(0, decimalValue);
+
+		decimalValue += 0.1;
+
+		c_network.dpSend(data); // sends the data (does not stop program)
+		#endif
+	}
+
+	return 0;
+}
+```
+
+- The above disables the logger to stop any output from the library itself. And lowers the timeout from 1s to 1ms. The sender as well has no lib output from the logger. And also has no function to make it wait.
+- The above is the fastest you can feasibly get with this network, other than lowering the buffersize to decrease serialization time. And or using the raw sender and receiver instead which does not need to be serialized/deserialized.
+
+
+
+### Overides and extra function
+- The project comes with a range of customisable features for the user. Many macros can be overrided for better use. As well as many functions to use for different use cases. Below lists the most common.
 
 ```cpp
-/**
- * Generic network
- */
-Server(bool thread = false); // Server constructor, optional thread init
-Client(bool thread = false, ConnectionType ct = ConnectionType::IP_SPECIFIC); // Client constructor, optional thread init, select different connectiontype (ANY/IP_SPECIFIC)
-void init(); // Used for server or client instances, initializes the network either on a seperate thread or same thread depending on constructed network
-Network(Type t, ConnectionType ct); // Generic network connection, takes type (SERVER or CLIENT) and connection type (ANY/IP_SPECIFIC)
-Type getType(); // Returns the type of network (SERVER/CLIENT)
-void initNetwork(); // Used for generic network(), initializes network depending on type and connection type
-void send(DataPacket &dp); // Used for Client, Server and generic Network. Sends datapacket to connected socket
-void recv(DataPacket &dp); // Used for Client, Server and generic Network. Receives datapacket from connected socket
-void registerSend(DataPacket &dp); // Starts a seperate thread, loops and sends data.
-void registerReceive(DataPacket &dp); // Starts a seperate thread, loops and receives data.
-void kill(); // Used for Client, Server, Network. Kills connection and purges all values.
-void stop(); // Stop threads and set the network to IDLE. (Loops in the background but does not serialize data nor send/recv)
-void start(); // sets the thread states back to running and puts the program in CONNECTED state
-State getState(); // Returns current program state
-ThreadState getState_t(); // Returns current thread state
+// These macro overrides must be specified before including the network library
 
 /**
- * Socket (Getters)
+ * Disables the logger and any output
  */
-Socket &getSocket(); // Returns reference to socket values. Allows user to modify socket values (accecced via Server, Client and Network)
-uint16_t getSocket().getHandshakePort(); // Returns port number for handshake
-uint16_t getSocket().getPort(); // returns port for user send/recv data
-const char *getSocket().getIP(); // Returns IP address, (Only used for Client/Network)
-int &getSocket().getSocket(); // Return reference to socket discriptor
-int &getSocket().getValread(); // Returns the read value from default std recv
-socklen_t &getRecvLen(); // return reference to length of the receive
-struct sockaddr_in &getLocalAddress(); // Return IPv4 local address values
-struct sockaddr_in &getExternalAddress(); // Return IPv4 external/connecting address values
-socklen_t &getLocalAddressLen(); // Return length of local address
-socklen_t &getExternalAddressLen(); // Return length of external address
-int16_t &getBufferSize(); // returns reference to buffersize
-int16_t &getPacketSize(); // return packetsize
+#define DISABLE_NT_LOGGER
 
 /**
- * Socket setters
+ * Use a different logger than the internal one. (Currently is DEFAULT_NT_LOGGER(x) std::cout << x << std::endl)
  */
-void getSocket().setPort(uint16_t port); // set port number for network
-void getSocket().setIP(const char ip[IP_LEN]); // sets the ip of the server
+#define DEFAULT_NT_LOGGER(x)
 
 /**
- * DEFINES (If you want to change buffer size/override any of these
- * defines, you need to define them before you include "UDP_TransferNT.h")
+ * Specify the default IP
+ * The need for changing is not very high, as the ip can be specified when making the instance of the network. And also changed seperatly afterwards using the getSocket() function.
  */
-#define TEAM // Does absolutely nothing :)
-#define SERVER_IP "127.0.0.1" // Defines the default server ip (used for local connection/debugging) override using setIP()
-#define IP_LEN 20 // Max size of an IP address is 20 characters
-#define DEFAULT_BUFFSIZE 512 // Defines the size of the buffer (size of each array intergers, decimals, etc...)
-#define HANDSHAKE_PORT 5800 // Handshake not implemented and this does nothing for now
-#define PORT 5801 // Default port number server/client (override using setPort())
+#define DEFAULT_NT_IP
 
 /**
- * Network macros
+ * Specify the default port,
+ * likewise with the ip address. It can be changed manually during runtime with getSocket()
  */
-#define KILL(s) perror(s); exit(1) // Kills the program with a message
-#define ERROR(s) fprintf(stderr, s); exit(1) // Print the current error and kill the program
-#define ERROR_PRINT(s) perror(s); printf("\n") // Prints the current error but does not exit the program
+#define DEFAULT_NT_PORT
+
+/**
+ * Change the default type block number. Changed how many blocks are made inside the buffer. (not recommended to change) as the number of blocks must be able to devide the buffersize evenly. E.g, block num is 4, 256/4 = 64 bytes
+ */
+#define DEFAULT_N_TYPEBLOCK
+
+/**
+ * Specify the buffer size. If you specify a buffer size on one device. You must change it to match on the other device/divices
+ */
+#define DEFAULT_BUFFER_SIZE
+
+
+#include "UDP_TransferNT.h" // macros are specified before this include
+
+
+// An instance of the network is required for all of these functions
+
+/**
+ * Network instance, with default options, type, connection type (ANY/IP_SPECIFIC), port, ip
+ */
+UDP_TransferNT::Network::Network(Type type, ConnectionType connType, int port = DEFAULT_NT_PORT, const char *ip = DEFAULT_NT_IP);
+
+/**
+ * Call the deconstructor, kills the socket and all the values
+ */
+UDP_TransferNT::Network::~Network();
+
+/**
+ * Get the socket wrapper
+ */
+UDP_TransferNT::Socket &UDP_TransferNT::Network::getSocket();
+
+/**
+ * Initialize the network with prior defined values (port number, network type, etc...)
+ * And connect/bind the server/client
+ */
+void UDP_TransferNT::Network::init();
+
+/**
+ * Resets the network and calls the init function again.
+ */
+void UDP_TransferNT::Network::reset();
+
+/**
+ * Raw send, sends a raw buffer the size of the buffer size
+ * Returns 0 or 1 depending on success or failure
+ */
+int UDP_TransferNT::Network::raw_send(const char buffer[DEFAULT_BUFFER_SIZE]);
+
+/**
+ * Receive a raw buffer
+ * returns 0 or 1 depending on success or failure
+ */
+int UDP_TransferNT::Network::raw_recv(char *buffer);
+
+/**
+ * Send over a datapacket
+ */
+void UDP_TransferNT::Network::dpSend(UDP_TransferNT::DataPacket &dp);
+
+/**
+ * receive a datapacket from the network.
+ * OPTIONAL: put in previously received datapacket to stop zeroed out data packets being returned if the receive fails
+ */
+UDP_TransferNT::DataPacket UDP_TransferNT::Network::dpRecv(UDP_TransferNT::DataPacket previousDP = {0});
+
+
+
+
+
+// The socket values need an instance of the network to access. E.g `network.getSocket().<socket function>()`
+
+/**
+ * Set the network port
+ */
+void UDP_TransferNT::Socket::setPort(int port);
+
+/**
+ * Set the ip of the network
+ */
+void UDP_TransferNT::Socket::setIP(const char *ip);
+
+/**
+ * Get the currently set port
+ */
+int UDP_TransferNT::Socket::getPort();
+
+/**
+ * Get the currently set ip
+ */
+const char *UDP_TransferNT::Socket::getIP();
+
+/**
+ * Set the receiver timeout (in ms)
+ */
+void UDP_TransferNT::Socket::setRecvTimeout(int ms);
+
+/**
+ * Get the receiver timeout value (in ms)
+ */
+int UDP_TransferNT::Socket::getRecvTimeout();
+
+/**
+ * Get the local address
+ */
+struct sockaddr_in &UDP_TransferNT::Socket::getLocalAddress();
+
+/**
+ * Get the other/external address
+ */
+struct sockaddr_in &UDP_TransferNT::Socket::getOtherAddress();
+
+/**
+ * Get the address length for both local and other
+ */
+#ifdef NT_UDP_PLATFORM_WINDOWS
+int *UDP_TransferNT::Socket::getLocalAddressLength();
+int *UDP_TransferNT::Socket::getOtherAddressLength();
+#elif defined(NT_UDP_PLATFORM_UNIX)
+socklen_t *UDP_TransferNT::Socket::getLocalAddressLength();
+socklen_t *UDP_TransferNT::Socket::getOtherAddressLength();
+#endif
+
+/**
+ * Create the socket from prior defined values
+ * Returns 0 on success, 1 on failure
+ */
+int UDP_TransferNT::Socket::createSocket(bool client = false);
+
+/**
+ * Prepare the socket structure.
+ * Defines the values needed for client or server. And if it's ANY or IP_SPECIFIC
+ */
+void UDP_TransferNT::Socket::prepSocketStructure(bool client = false, bool ipSpecific = false);
+
+/**
+ * Bind to the socket
+ * Used for server to bind and listen for connections
+ * 
+ * returns 0 or 1 on success/failure
+ */
+int UDP_TransferNT::Socket::bindSocket(bool client = false);
+
+/**
+ * Connect to external address
+ * Used for client to connect to other addresses (mainly used in IP_SPECIFIC workloads).
+ * This function can be disables for a more open network even with IP_SPECIFIC enabled
+ * 
+ * returns 0 or 1 on success/failure
+ */
+int UDP_TransferNT::Socket::connectSocket(bool client = false);
+
+/**
+ * Disable the connect function
+ */
+void UDP_TransferNT::Socket::disableConnect(bool disable = true);
+
+/**
+ * Kill the socket and purge any existing values
+ */
+void UDP_TransferNT::Socket::killSocket();
+
 ```
+
+<sub><sup>readme written by [@CJBuchel](https://github.com/CJBuchel), 16/09/21</sup></sub>

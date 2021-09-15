@@ -62,7 +62,7 @@ namespace UDP_TransferNT {
 		}
 
 		~Network() {
-			_socket.close();
+			_socket.killSocket();
 		}
 
 		Socket &getSocket() {
@@ -74,7 +74,7 @@ namespace UDP_TransferNT {
 				int programValue = 0;
 				if (_connStat == ConnectionStatus::CONNECTING) {
 					DEFAULT_NT_LOGGER("Closing Socket, reconnecting...");
-					_socket.close();
+					_socket.killSocket();
 				}
 
 				_connStat = ConnectionStatus::CONNECTING;
@@ -163,7 +163,7 @@ namespace UDP_TransferNT {
 							DEFAULT_NT_LOGGER("Server Send error windows: " + std::to_string(WSAGetLastError()));
 							programValue = 1;
 						}
-						#elif defined(NT_UPD_PLATFORM_UNIX)
+						#elif defined(NT_UDP_PLATFORM_UNIX)
 						if (sendto(_socket.getSocket(), buffer, DEFAULT_BUFFER_SIZE, 0, (struct sockaddr *)&_socket.getOtherAddress(), *_socket.getOtherAddressLength()) < 0) {
 							DEFAULT_NT_LOGGER("Server Send error unix");
 							programValue = 1;
@@ -177,7 +177,7 @@ namespace UDP_TransferNT {
 							DEFAULT_NT_LOGGER("Client Send error windows: " + std::to_string(WSAGetLastError()));
 							programValue = 1;
 						}
-						#elif defined(NT_UPD_PLATFORM_UNIX)
+						#elif defined(NT_UDP_PLATFORM_UNIX)
 						if (sendto(_socket.getSocket(), buffer, DEFAULT_BUFFER_SIZE, 0, (struct sockaddr *)&_socket.getOtherAddress(), *_socket.getOtherAddressLength()) < 0) {
 							DEFAULT_NT_LOGGER("Client Send error unix");
 							programValue = 1;
@@ -224,7 +224,7 @@ namespace UDP_TransferNT {
 							programValue = 1;
 						}
 						#elif defined(NT_UDP_PLATFORM_UNIX)
-						if (recvfrom(_socket.getSocket(), buffer, DEFAULT_BUFFER_SIZE, MSG_DONTWAIT, (struct sockaddr *)&_socket.getOtherAddress(), _socket.getOtherAddressLength()) < 0) {
+						if (recvfrom(_socket.getSocket(), buffer, DEFAULT_BUFFER_SIZE, 0, (struct sockaddr *)&_socket.getOtherAddress(), _socket.getOtherAddressLength()) < 0) {
 							DEFAULT_NT_LOGGER("Client Recv error unix");
 							programValue = 1;
 						}

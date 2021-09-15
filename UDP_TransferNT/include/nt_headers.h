@@ -3,6 +3,7 @@
 
 #include "nt_platform.h"
 #include <string>
+#include <iostream>
 
 #ifdef DISABLE_NT_LOGGER
 	#define DEFAULT_NT_LOGGER(x)
@@ -36,10 +37,17 @@
 	#include <stdio.h>
 	#include <WinSock2.h>
 	#include <WS2tcpip.h>
-	#pragma comment(lib,"Ws2_32.lib") //Winsock Library
-// headers for linux/macos socket
+	#pragma comment(lib,"Ws2_32.lib")
 #elif defined(NT_UDP_PLATFORM_UNIX)
-
-
+	#include <stdio.h>
+	#include <string.h>
+	#include <stdlib.h>
+	#include <arpa/inet.h>
+	#include <sys/socket.h>
+	#include <sys/types.h>
+	#include <netinet/in.h>
+	#include <netdb.h>
+	#include <unistd.h>
+	#include <tuple>
 #endif // nt platform
 #endif // NT_HEADERS_H

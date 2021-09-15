@@ -4,8 +4,8 @@
 
 #ifdef NT_UDP_PLATFORM_WINDOWS
 #include <Windows.h>
-#elif defined(NT_UDP_PLATFORM_WINDOWS)
-#include <system>
+#elif defined(NT_UDP_PLATFORM_UNIX)
+#include <time.h>
 #endif
 
 #include <thread>
@@ -33,7 +33,12 @@ void server() {
 		std::cout << "DP Recv: " << dpRecv.getIntegers(3) << std::endl;
 		std::cout << "DP Recv: " << dpRecv.getBooleans(5) << std::endl;
 		std::cout << "DP Recv: " << dpRecv.getDecimals(2) << std::endl;
+
+		#ifdef NT_UDP_PLATFORM_WINDOWS
 		Sleep(1000);
+		#elif defined(NT_UDP_PLATFORM_UNIX)
+		sleep(1);
+		#endif
 		// dpRecv = s_network.dpRecv(dpRecv);
 	}
 }
@@ -64,7 +69,11 @@ void client() {
 		// c_network.raw_send(buffer);
 		// free(buffer);
 		// std::cout << "Whats the issue here" << std::endl;
+		#ifdef NT_UDP_PLATFORM_WINDOWS
 		Sleep(1000);
+		#elif defined(NT_UDP_PLATFORM_UNIX)
+		sleep(1);
+		#endif
 	}
 }
 

@@ -21,6 +21,7 @@ model {
 			}
 
 			binaries.all {
+				linker.args '-pthread'
 				cppCompiler.args '-pthread'
 			}
 		}

@@ -3,13 +3,13 @@
 ## Fast paced point to point network connection
 
 ### Project Overview
-- UDP (User Datagram Protocol) does not require the need for handshaking between a server and client. Due to this it is faster than other network transfer protocols like TCP. This network library is a small but usefull wrapper around both winsock2 and the standard unix socket for C programs written in C++. Providing methods for creating both Servers and Clients with the option of either allowing ANY connection or IP_SPECIFIC connections for point to point transfer.
+- UDP (User Datagram Protocol) does not require the need for handshaking between a server and client. Due to this it is faster than other network transfer protocols like TCP. This network library is a small but usefull wrapper around both winsock2 and the standard unix socket for C programs, written in C++. Providing methods for creating both Servers and Clients with the option of either allowing ANY connection or IP_SPECIFIC connections for point to point transfer.
 
-- Sending and Receiving can be done either using the raw send receive function with a byte array, or by using the built in datapackets which are serialized and deserialized using the the Serializer. The project has a default buffersize of `256` bytes which can be overrided. 
+- Sending and Receiving can be done either using the raw send receive functions with a byte array, or by using the built in datapackets which are serialized and deserialized using the the Serializer. The project has a default buffersize of `256` bytes which can be overridden. 
 
-- Datapackets are sent using a serializing method of 4 byte arrays that fit into the buffer. Characters, Integers, Booleans and Decimals. The byte arrays have their own segmented block inside the main byte array which is sent and received. These segments (TYPEBLOCKS) vary in size but have an even amount of bytes alocated to them. I.e. A buffersize of `256 bytes` has segmented blocks that looks like this `|64|64|64|64|`. Each block has `64 bytes` allocated to it. But could also be represented as `|Characters|Integers|Booleans|Decimals|`. Where each segmented block is a data type array of either characters, integers, booleans or decimals. You can see the method of serializing and deserializing in the file [Serializer.h](UDP_TransferNT/include/Serializer.h).
+- Datapackets are sent using a serializing method of 4 data type arrays that fit into the buffer. Characters, Integers, Booleans and Decimals. The data type arrays have their own segmented block inside the main byte array which is sent and received. These segments (TYPEBLOCKS) vary in size but have an even amount of bytes alocated to them. I.e. A buffersize of `256 bytes` has segmented blocks that resemble `|64|64|64|64|`. Each block has `64 bytes` allocated to it. But could also be represented as `|Characters|Integers|Booleans|Decimals|`. Where each segmented block is a data type array of either characters, integers, booleans or decimals. You can see the method of serializing and deserializing in the file [Serializer.h](UDP_TransferNT/include/Serializer.h).
 
-- Each segment block varies in how many values it can hold. Because the buffersize can change depending on what the user defines it as. I.e if the buffersize is 256, each block size is 64 bytes. Then you could hold `64 characters`, `16 integers`, `64 booleans` and `16 decimals` (which are stored as floats). The array of data is specified as `dataType DataArray[BLOCK_SIZE/sizeof(dataType)]`.
+- Each segment block varies in how many values it can hold. Because the buffersize can change depending on what the user defines it as. I.e, if the buffersize is 256, each block size is 64 bytes. Then you could hold `64 characters`, `16 integers`, `64 booleans` and `16 decimals` (which are stored as floats). The array of data is specified as `dataType DataArray[BLOCK_SIZE/sizeof(dataType)]`.
 
 ### Installation
 - The project is built as a header library and just needs the `include` dir linked with the build of your main project
@@ -46,7 +46,7 @@ sources.cpp {
 - Client is our `sender` | IP_Specific
 - Port: `5801` <- Default
 - IP: `10.47.88.2` Default is -> localhost: `127.0.0.1`
-- Buffersize: `256` <- Defaul
+- Buffersize: `256` <- Default
 - RecvTimeout: `1000` <- default (ms)
 
 #### Server (Receiver)
@@ -119,14 +119,14 @@ int main() {
 ```
 
 ### Point to Point using raw buffers
-- If the preference of using a raw send receive without a serialized datapacket is more apealing. The raw sender and receivers are available to use. Simillar to the datapackets, they fit inside the the set buffer size. But do not segment the buffer at all. If you plan to use your own method of serializing then this would be preferable. E.g, you could send `256 characters` over the network if you wanted a full string message to be sent.
+- If the preference of using a raw send receive without a serialized datapacket is more appealing. The raw sender and receivers are available to use. Similar to the datapackets, they fit inside the the set buffer size. But do not segment the buffer at all. If you plan to use your own method of serializing then this would be preferable. E.g, you could send `256 characters` over the network if you wanted a full string message to be sent.
 
 #### Config
 - Server is our `receiver` | IP_Specific/ANY
 - Client is our `sender` | IP_Specific
 - Port: `5801` <- Default
 - IP: `10.47.88.2` Default is -> localhost: `127.0.0.1`
-- Buffersize: `256` <- Defaul
+- Buffersize: `256` <- Default
 - RecvTimeout: `1000` <- default (ms)
 
 #### Server (Receiver)
@@ -201,13 +201,13 @@ int main() {
 
 
 ### Notes and Optimisation
-- If this network is being used for fast paced networking between two or more devices you can optimise the project heavily. However there I caution anyone doing it. As this uses raw socket programming compared to other methods (i.e Network Tables). It can easily saturate an entire existing network, as it has no speed limit unless specified to do so. The only limitation, is the hardware this project runs on, and the program that it's being imported into. It's recommened to slow this project down to a have a cycle time of 10ms. As this provides both a decent speed and low network saturation cost.
+- If this network is being used for fast paced networking between two or more devices you can optimise the project heavily. However I caution anyone doing it. As this uses raw socket programming compared to other methods (i.e Network Tables). It can easily saturate an entire existing network, as it has no speed limit unless specified to do so. The only limitation, is the hardware this project runs on, and the program that it's being imported into. It's recommended to slow this project down to a cycle time of 10ms. As this provides both a decent speed and relatively low network saturation cost.
 
 - That being said. To optimise the project there are two main methods to do so. On the receiving end the project receive timeout can be lowered to a minimum of 1 (Meaning 1 ms). This results in the program instantly skipping the `dpRecv()` or `raw_recv()` functions unless data exists. Because of this, a receive error will often pop up, especially if one device is running faster than the other. 
 
-- This can be resolved by disabling the logger before uncluding the library. This improves speed as the logger requires some logic to output text to the console. However, it will remove error messages too.
+- This can be resolved by disabling the logger before including the library. This improves speed as the logger requires some logic to output text to the console. However, it will remove error messages too.
 
-- An example of the fastest network possible can be seen below (receiver side. Sender side needs no real change other than removing any function to make the project wait)
+- An example of this type of optimisation can be seen below (Sender side needs no real change other than removing any function to make the project wait/sleep)
 
 #### Server (Receiver)
 ```cpp
@@ -274,8 +274,8 @@ int main() {
 
 
 
-### Overides and extra function
-- The project comes with a range of customisable features for the user. Many macros can be overrided for better use. As well as many functions to use for different use cases. Below lists the most common.
+### Overrides and extra functions
+- The project comes with a range of customisable features for the user. Many macros can be overridden for better use. As well as many functions to use for different use cases. Below lists the most common.
 
 ```cpp
 // These macro overrides must be specified before including the network library
@@ -292,7 +292,7 @@ int main() {
 
 /**
  * Specify the default IP
- * The need for changing is not very high, as the ip can be specified when making the instance of the network. And also changed seperatly afterwards using the getSocket() function.
+ * The need for changing is not very high, as the ip can be specified when making the instance of the network. And also changed separately afterwards using the getSocket() function.
  */
 #define DEFAULT_NT_IP
 
@@ -303,12 +303,12 @@ int main() {
 #define DEFAULT_NT_PORT
 
 /**
- * Change the default type block number. Changed how many blocks are made inside the buffer. (not recommended to change) as the number of blocks must be able to devide the buffersize evenly. E.g, block num is 4, 256/4 = 64 bytes
+ * Change the default type block number. Changed how many blocks are made inside the buffer. (not recommended to change) as the number of blocks must be able to divide the buffersize evenly. E.g, block num is 4, 256/4 = 64 bytes
  */
 #define DEFAULT_N_TYPEBLOCK
 
 /**
- * Specify the buffer size. If you specify a buffer size on one device. You must change it to match on the other device/divices
+ * Specify the buffer size. If you specify a buffer size on one device. You must change it to match on the other device/devices
  */
 #define DEFAULT_BUFFER_SIZE
 

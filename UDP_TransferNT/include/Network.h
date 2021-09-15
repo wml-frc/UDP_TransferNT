@@ -44,21 +44,14 @@ namespace UDP_TransferNT {
 		};
 
 		/**
-		 * Main network, initialize as either server or client
+		 * Main network, initialize as either server or client with optional override values
 		 */
-		Network(Type type, ConnectionType connType, int port = DEFAULT_NT_PORT, const char *ip = DEFAULT_NT_IP, int bufferSize = DEFAULT_BUFFER_SIZE) : _type(type), _connType(connType) {
+		Network(Type type, ConnectionType connType, int port = DEFAULT_NT_PORT, const char *ip = DEFAULT_NT_IP) : _type(type), _connType(connType) {
 			// Set the socket vals
 			_socket.setPort(port);
 			_socket.setIP(ip);
 
-			// Display the vals
-			DEFAULT_NT_LOGGER("Network Constructed with values");
-			DEFAULT_NT_LOGGER("Type: " + std::to_string((int)_type));
-			DEFAULT_NT_LOGGER("Connection Type: " + std::to_string((int)_connType));
-			DEFAULT_NT_LOGGER("Port: " + std::to_string(_socket.getPort()));
-			DEFAULT_NT_LOGGER(_socket.getIP());
-			DEFAULT_NT_LOGGER("Buffer Size: " + std::to_string(DEFAULT_BUFFER_SIZE));
-			DEFAULT_NT_LOGGER("Packet size: " + std::to_string(PACKETSIZE));
+			DEFAULT_NT_LOGGER("Network Constructed");
 		}
 
 		~Network() {
@@ -69,6 +62,9 @@ namespace UDP_TransferNT {
 			return _socket;
 		}
 
+		/**
+		 * Initialize connection using defined socket value set by user and constructed network instance
+		 */
 		void init() {
 			while (_connStat != ConnectionStatus::CONNECTED) {
 				int programValue = 0;
@@ -113,6 +109,7 @@ namespace UDP_TransferNT {
 							_socket.prepSocketStructure(true);
 						} else if (_connType == ConnectionType::IP_SPECIFIC) {
 							_socket.prepSocketStructure(true, true);
+							_socket.connectSocket(true);
 						}
 
 						break; // CLIENT END
@@ -129,6 +126,14 @@ namespace UDP_TransferNT {
 				#endif
 
 				if (programValue == 0) {
+					// Display the vals
+					DEFAULT_NT_LOGGER("Network Initialized with values");
+					DEFAULT_NT_LOGGER("Type: " + std::to_string((int)_type));
+					DEFAULT_NT_LOGGER("Connection Type: " + std::to_string((int)_connType));
+					DEFAULT_NT_LOGGER("Port: " + std::to_string(_socket.getPort()));
+					DEFAULT_NT_LOGGER(_socket.getIP());
+					DEFAULT_NT_LOGGER("Buffer Size: " + std::to_string(DEFAULT_BUFFER_SIZE));
+					DEFAULT_NT_LOGGER("Packet size: " + std::to_string(PACKETSIZE));
 					_connStat = ConnectionStatus::CONNECTED;
 					_state = State::IDLE;
 				} else {

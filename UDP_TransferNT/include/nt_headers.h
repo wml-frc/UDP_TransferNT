@@ -4,6 +4,7 @@
 #include "nt_platform.h"
 #include <string>
 #include <iostream>
+#include <typeinfo>
 
 #ifdef DISABLE_NT_LOGGER
 	#define DEFAULT_NT_LOGGER(x)

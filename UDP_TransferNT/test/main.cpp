@@ -15,13 +15,13 @@ using namespace UDP_TransferNT;
 int cycleCount = 20;
 
 void server() {
-	Network s_network(Network::Type::SERVER, Network::ConnectionType::ANY);
-	// s_network.getSocket().setRecvTimeout(1);
+	Network s_network(Network::Type::SERVER, Network::ConnectionType::IP_SPECIFIC);
+	s_network.getSocket().setRecvTimeout(10);
 	s_network.init();
 
 	DataPacket dpRecv;
-	// while (true) {
-	for (int i = 0; i < cycleCount; i++) {
+	while (true) {
+	// for (int i = 0; i < cycleCount; i++) {
 
 		// char *buffer;
 		// memset(buffer, '\0', DEFAULT_BUFFER_SIZE);
@@ -35,23 +35,24 @@ void server() {
 		std::cout << "DP Recv: " << dpRecv.getDecimals(2) << std::endl;
 
 		#ifdef NT_UDP_PLATFORM_WINDOWS
-		Sleep(1000);
+		// Sleep(1000);
 		#elif defined(NT_UDP_PLATFORM_UNIX)
-		sleep(1);
+		// sleep(1);
 		#endif
 		// dpRecv = s_network.dpRecv(dpRecv);
 	}
 }
 
 void client() {
-	Network c_network(Network::Type::CLIENT, Network::ConnectionType::ANY);
+	Network c_network(Network::Type::CLIENT, Network::ConnectionType::IP_SPECIFIC);
+	c_network.getSocket().setIP("192.168.178.210");
 	c_network.init();
 
 	DataPacket dpSend;
 	float changingVal = 0.4;
 
-	// while (true) {
-	for (int i = 0; i < cycleCount; i++) {
+	while (true) {
+	// for (int i = 0; i < cycleCount; i++) {
 		// dpSend.setDecimals(0, 0.5);
 		dpSend.setCharacters(0, 'c');
 		dpSend.setIntegers(3, 1);
@@ -72,7 +73,7 @@ void client() {
 		#ifdef NT_UDP_PLATFORM_WINDOWS
 		Sleep(1000);
 		#elif defined(NT_UDP_PLATFORM_UNIX)
-		sleep(1);
+		usleep(1000);
 		#endif
 	}
 }
@@ -87,14 +88,17 @@ int main() {
 	std::cout << "Test Run..." << std::endl;
 	// divertCout();
 
+	// int test; 
+
+	// std::cout << sizeof(typeid(test)) << " " << sizeof(int) << std::endl;
 	// server();
-	// client();
+	client();
 
-	std::thread server_t(server);
-	std::thread client_t(client);
+	// std::thread server_t(server);
+	// std::thread client_t(client);
 
-	server_t.join();
-	client_t.join();
+	// server_t.join();
+	// client_t.join();
 
 	system("pause");
 

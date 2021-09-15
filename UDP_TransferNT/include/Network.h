@@ -154,6 +154,7 @@ namespace UDP_TransferNT {
 		 */
 		int raw_send(const char buffer[DEFAULT_BUFFER_SIZE]) {
 			int programValue = 0;
+			int sendVal = 0;
 			if (_connStat == ConnectionStatus::CONNECTED) {
 				_state = State::RUNNING;
 				switch (_type) {
@@ -164,8 +165,8 @@ namespace UDP_TransferNT {
 							programValue = 1;
 						}
 						#elif defined(NT_UDP_PLATFORM_UNIX)
-						if (sendto(_socket.getSocket(), buffer, DEFAULT_BUFFER_SIZE, 0, (struct sockaddr *)&_socket.getOtherAddress(), *_socket.getOtherAddressLength()) < 0) {
-							DEFAULT_NT_LOGGER("Server Send error unix");
+						if ((sendVal = sendto(_socket.getSocket(), buffer, DEFAULT_BUFFER_SIZE, 0, (struct sockaddr *)&_socket.getOtherAddress(), *_socket.getOtherAddressLength())) < 0) {
+							DEFAULT_NT_LOGGER("Server Send error unix: " + std::to_string(sendVal));
 							programValue = 1;
 						}
 						#endif
@@ -178,8 +179,8 @@ namespace UDP_TransferNT {
 							programValue = 1;
 						}
 						#elif defined(NT_UDP_PLATFORM_UNIX)
-						if (sendto(_socket.getSocket(), buffer, DEFAULT_BUFFER_SIZE, 0, (struct sockaddr *)&_socket.getOtherAddress(), *_socket.getOtherAddressLength()) < 0) {
-							DEFAULT_NT_LOGGER("Client Send error unix");
+						if ((sendVal = sendto(_socket.getSocket(), buffer, DEFAULT_BUFFER_SIZE, 0, (struct sockaddr *)&_socket.getOtherAddress(), *_socket.getOtherAddressLength())) < 0) {
+							DEFAULT_NT_LOGGER("Client Send error unix: " + std::to_string(sendVal));
 							programValue = 1;
 						}
 						#endif
@@ -198,6 +199,7 @@ namespace UDP_TransferNT {
 		 */
 		int raw_recv(char *buffer) {
 			int programValue = 0;
+			int recvVal = 0;
 			memset(buffer, 0, DEFAULT_BUFFER_SIZE);
 			if (_connStat == ConnectionStatus::CONNECTED) {
 				_state = State::RUNNING;
@@ -210,8 +212,8 @@ namespace UDP_TransferNT {
 						}
 
 						#elif defined(NT_UDP_PLATFORM_UNIX)
-						if (recvfrom(_socket.getSocket(), buffer, DEFAULT_BUFFER_SIZE, 0, (struct sockaddr *)&_socket.getOtherAddress(), _socket.getOtherAddressLength()) < 0) {
-							DEFAULT_NT_LOGGER("Server Recv error unix");
+						if ((recvVal = recvfrom(_socket.getSocket(), buffer, DEFAULT_BUFFER_SIZE, 0, (struct sockaddr *)&_socket.getOtherAddress(), _socket.getOtherAddressLength())) < 0) {
+							DEFAULT_NT_LOGGER("Server Recv error unix: " + std::to_string(recvVal));
 							programValue = 1;
 						}
 						#endif
@@ -224,8 +226,8 @@ namespace UDP_TransferNT {
 							programValue = 1;
 						}
 						#elif defined(NT_UDP_PLATFORM_UNIX)
-						if (recvfrom(_socket.getSocket(), buffer, DEFAULT_BUFFER_SIZE, 0, (struct sockaddr *)&_socket.getOtherAddress(), _socket.getOtherAddressLength()) < 0) {
-							DEFAULT_NT_LOGGER("Client Recv error unix");
+						if ((recvVal = recvfrom(_socket.getSocket(), buffer, DEFAULT_BUFFER_SIZE, 0, (struct sockaddr *)&_socket.getOtherAddress(), _socket.getOtherAddressLength())) < 0) {
+							DEFAULT_NT_LOGGER("Client Recv error unix: " + std::to_string(recvVal));
 							programValue = 1;
 						}
 						#endif

@@ -15,7 +15,7 @@ using namespace UDP_TransferNT;
 int cycleCount = 20;
 
 void server() {
-	Network s_network(Network::Type::SERVER, Network::ConnectionType::IP_SPECIFIC);
+	Network s_network(Network::Type::SERVER, Network::ConnectionType::ANY);
 	// s_network.getSocket().setRecvTimeout(1);
 	s_network.init();
 
@@ -44,7 +44,7 @@ void server() {
 }
 
 void client() {
-	Network c_network(Network::Type::CLIENT, Network::ConnectionType::IP_SPECIFIC);
+	Network c_network(Network::Type::CLIENT, Network::ConnectionType::ANY);
 	c_network.init();
 
 	DataPacket dpSend;

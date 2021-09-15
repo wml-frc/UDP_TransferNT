@@ -109,6 +109,20 @@ namespace UDP_TransferNT {
 				_si_local.sin_family = AF_INET;
 				_si_local.sin_port = htons(_port);
 				_si_local.sin_addr.s_addr = htonl(INADDR_ANY);
+
+				_si_other.sin_family = AF_INET;
+				_si_other.sin_port = htons(_port);
+
+				if (ipSpecific) {
+					#ifdef NT_UDP_PLATFORM_WINDOWS
+						inet_pton(AF_INET, _ip, &_si_other.sin_addr);
+					#elif defined(NT_UDP_PLATFORM_UNIX)
+						_host = (struct hostent *)gethostbyname((char *)_ip);
+						_si_other.sin_addr = *((struct in_addr *)_host->h_addr);
+					#endif
+				} else {
+					_si_other.sin_addr.s_addr = INADDR_ANY;
+				}
 			}
 		}
 

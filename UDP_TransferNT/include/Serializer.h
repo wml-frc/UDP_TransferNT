@@ -9,14 +9,13 @@ namespace UDP_TransferNT {
 	 public:
 
 		/**
-		 * Serial cycler. Serialize data types into large datatype
+		 * Serial cycler. Serialize data type arrays [T] into byte stream [V]
 		 */
 		template <typename T, typename V>
 		static T *serialCycler(T *singleDT, V *data, bool reverse = false) {
 			T *dataType = (T *)data;
 
-			int i = 0;
-			while (i < (DATAPACKET_TYPESIZE/sizeof(T))) {
+			for (int i = 0; i < (DATAPACKET_TYPESIZE/sizeof(T)); i++) {
 				if (reverse) {
 					singleDT[i] = *dataType;
 				} else {
@@ -24,7 +23,6 @@ namespace UDP_TransferNT {
 				}
 
 				dataType++;
-				i++;
 			}
 
 			return dataType;

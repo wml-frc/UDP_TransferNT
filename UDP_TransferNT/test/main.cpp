@@ -26,17 +26,15 @@ void server() {
 		// char *buffer;
 		// memset(buffer, '\0', DEFAULT_BUFFER_SIZE);
 		
-		char *buffer;
-		buffer = (char *)malloc(sizeof(char) * DEFAULT_BUFFER_SIZE);
-		// buffer = "Hello from server";
-		// s_network.raw_recv(buffer);
-		// s_network.raw_send(buffer);
-		s_network.raw_recv(buffer);
-		std::cout << "From Buffer: " << buffer << std::endl;
-		free(buffer);
+
+		// free(buffer);
+		dpRecv = s_network.dpRecv(dpRecv);
+		std::cout << "DP Recv: " << dpRecv.getCharacters(0) << std::endl;
+		std::cout << "DP Recv: " << dpRecv.getIntegers(3) << std::endl;
+		std::cout << "DP Recv: " << dpRecv.getBooleans(5) << std::endl;
+		std::cout << "DP Recv: " << dpRecv.getDecimals(2) << std::endl;
 		Sleep(1000);
 		// dpRecv = s_network.dpRecv(dpRecv);
-		// std::cout << "DP Recv: " << dpRecv.getDecimals(0) << std::endl;
 	}
 }
 
@@ -45,11 +43,19 @@ void client() {
 	c_network.init();
 
 	DataPacket dpSend;
+	float changingVal = 0.4;
 
 	// while (true) {
 	for (int i = 0; i < cycleCount; i++) {
 		// dpSend.setDecimals(0, 0.5);
 		dpSend.setCharacters(0, 'c');
+		dpSend.setIntegers(3, 1);
+		dpSend.setBooleans(5, true);
+		dpSend.setDecimals(2, changingVal);
+
+		changingVal++;
+
+
 		c_network.dpSend(dpSend);
 		// std::cout << "Hello?" << std::endl;
 		// const char buffer[DEFAULT_BUFFER_SIZE] = "Hello from client";
@@ -73,13 +79,13 @@ int main() {
 	// divertCout();
 
 	// server();
-	client();
+	// client();
 
-	// std::thread server_t(server);
-	// std::thread client_t(client);
+	std::thread server_t(server);
+	std::thread client_t(client);
 
-	// server_t.join();
-	// client_t.join();
+	server_t.join();
+	client_t.join();
 
 	system("pause");
 

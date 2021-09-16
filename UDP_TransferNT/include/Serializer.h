@@ -15,7 +15,7 @@ namespace UDP_TransferNT {
 		static T *serialCycler(T *singleDT, V *data, bool reverse = false) {
 			T *dataType = (T *)data;
 
-			for (int i = 0; i < (DATAPACKET_TYPESIZE/sizeof(T)); i++) {
+			for (size_t i = 0; i < (DATAPACKET_TYPESIZE/sizeof(T)); i++) {
 				if (reverse) {
 					singleDT[i] = *dataType;
 				} else {

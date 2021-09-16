@@ -26,22 +26,22 @@ namespace UDP_TransferNT {
 		/**
 		 * Set character in datapacket using index and value
 		 */
-		void setCharacters(int index, char value) { DP_CHECK_SCOPE(index, value, dp.characters[index] = (char)value;) }
+		void setCharacters(unsigned int index, char value) { DP_CHECK_SCOPE(index, value, dp.characters[index] = (char)value;) }
 
 		/**
 		 * Set integer in datapacket using index and value
 		 */
-		void setIntegers(int index, int value) { DP_CHECK_SCOPE(index, value, dp.integers[index] = (int)value;) }
+		void setIntegers(unsigned int index, int value) { DP_CHECK_SCOPE(index, value, dp.integers[index] = (int)value;) }
 
 		/**
 		 * Set boolean in datapacket using index and value
 		 */
-		void setBooleans(int index, bool value) { DP_CHECK_SCOPE(index, value, dp.booleans[index] = (int)value;) }
+		void setBooleans(unsigned int index, bool value) { DP_CHECK_SCOPE(index, value, dp.booleans[index] = (int)value;) }
 
 		/**
 		 * Set deceimal value in datapacket using index and value
 		 */
-		void setDecimals(int index, float value) { DP_CHECK_SCOPE(index, value, dp.decimals[index] = (float)value;) }
+		void setDecimals(unsigned int index, float value) { DP_CHECK_SCOPE(index, value, dp.decimals[index] = (float)value;) }
 
 
 

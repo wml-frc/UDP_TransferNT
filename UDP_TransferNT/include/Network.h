@@ -56,6 +56,7 @@ namespace UDP_TransferNT {
 
 		~Network() {
 			_socket.killSocket();
+			DEFAULT_NT_LOGGER("Network Destroyed");
 		}
 
 		Socket &getSocket() {

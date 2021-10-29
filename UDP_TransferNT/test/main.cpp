@@ -100,7 +100,7 @@ int main() {
 	// server_t.join();
 	// client_t.join();
 
-	system("pause");
+	// system("pause");
 
 	return 0;
 }

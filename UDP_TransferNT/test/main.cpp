@@ -92,7 +92,7 @@ int main() {
 
 	// std::cout << sizeof(typeid(test)) << " " << sizeof(int) << std::endl;
 	// server();
-	client();
+	// client();
 
 	// std::thread server_t(server);
 	// std::thread client_t(client);

@@ -280,7 +280,7 @@ namespace UDP_TransferNT {
 		 * Use previously received datapacket as paramater to get streamline data.
 		 * (Stops random zeroed out datapacket from being returned if no datapacket is received)
 		 */
-		DataPacket dpRecv(DataPacket dpPrevious = {0}, bool disablePrintError = false) {
+		DataPacket dpRecv(DataPacket dpPrevious = {}, bool disablePrintError = false) {
 			if (_connStat == ConnectionStatus::CONNECTED) {
 				DataPacket dpBuffer;
 				char *recvBuffer = (char *)malloc(DEFAULT_BUFFER_SIZE * sizeof(char));
